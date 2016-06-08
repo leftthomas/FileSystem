@@ -32,7 +32,7 @@ void ls()//列文件目录
             else {
                 tmp[j] = '-';
             }
-}
+        }
         tmp[3] = '\0';
         printf("%20s", tmp);
         if (UFD[User][i].status) {
@@ -151,17 +151,16 @@ void open()//打开文件
             return;
         }
     }
-    printf("Failed... No such file\n");
+    printf("Failed... No such file\n");//找不到文件
+}
     void close()//关闭文件
     {
         long i;
         char filename[SizeOfFileName];
         printf("Input filename>");
-//找不到文件
-    }
-}
 
-scanf("%s",filename);
+
+        scanf("%s",filename);
 for (
 i = 0;
 i<num[User];

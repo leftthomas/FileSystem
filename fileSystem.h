@@ -258,7 +258,6 @@ public:
         }
     }
 
-
     /**
    * 用户鉴权,用来判断user是否有权访问或操作此目录或文件
    * x:无权限
@@ -523,12 +522,36 @@ public:
     }
 
     /**
+ * 只用在rmdir时,用来判断是否此目录下的文件都有权限删除
+ */
+//    bool authAll(string username,tomFile *dir){
+//        if (dir->getPermissions().find(username) == dir->getPermissions().end()) {
+//            //找下everyone
+//            if (dir->getPermissions().find("everyone") == dir->getPermissions().end())
+//                return false;
+//            else{
+//                if(dir->getPermissions().find("everyone")->second!="rw")
+//                    return false;
+//                else
+//                    for (int i = 0; i < dir->getChildren().size(); ++i) {
+//                         authAll(username,dir->getChildren()[i]);
+//                    }
+//            }
+//
+//        }
+//        else{
+//            if(dir->getPermissions().find(username)->second!="rw")
+//                return false;
+//        }
+//    }
+
+    /**
      * rmdir命令,删除一个目录,只能是当前路径下的目录,需要鉴权,可以是data/a,b形式
      * 特别需要注意的是删除时必须目录下的全部文件都有权才可以删除
      */
     void rmdir(string dirname, string username) {
         if (util::findIllegalCharacter(dirname, true))
-            cout << "the filename is illegal" << endl;
+            cout << "the dirname is illegal" << endl;
         else {
             tomFile *file;
             //注意一下这种特殊情况,这是根节点的情况
@@ -537,10 +560,10 @@ public:
             else
                 file = findFileByPath(current_file->getPath() + "/" + dirname, current_file);
             if (file != NULL) {
-                if (file->getType() == "dir") {
-                    cout << "it's a dir,not a file" << endl;
+                if (file->getType() == "file") {
+                    cout << "it's a file,not a dir" << endl;
                 } else {
-                    //鉴权
+                    //TODO 这个与其它不一样 鉴权
                     if (authUser(username, file) == "rw") {
                         for (int i = 0; i < file->getParent()->getChildren().size(); ++i) {
                             if (file->getParent()->getChildren()[i]->getName() == file->getName()) {
@@ -548,15 +571,18 @@ public:
                                 break;
                             }
                         }
-                        delete file;
+                        //删除所有节点
+                        destroy(file);
                     } else {
-                        cout << "you have no access to remove this file" << endl;
+                        cout << "you have no access to remove this dir" << endl;
                     }
                 }
             } else
-                cout << "this file is not existed" << endl;
+                cout << "this dir is not existed" << endl;
         }
     }
+
+
 };
 
 

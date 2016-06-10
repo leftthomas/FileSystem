@@ -8,6 +8,9 @@
 #include <string>
 #include "tomFile.h"
 
+//只用在需要整棵子树操作的情况下记录总的鉴权结果
+static bool qualification;
+
 using namespace std;
 
 class fileSystem {
@@ -522,28 +525,42 @@ public:
     }
 
     /**
- * 只用在rmdir时,用来判断是否此目录下的文件都有权限删除
+ * 只用在rmdir等需要子树操作时,用来判断是否此目录下的文件是否都有权限删除、移动等
  */
-//    bool authAll(string username,tomFile *dir){
-//        if (dir->getPermissions().find(username) == dir->getPermissions().end()) {
-//            //找下everyone
-//            if (dir->getPermissions().find("everyone") == dir->getPermissions().end())
-//                return false;
-//            else{
-//                if(dir->getPermissions().find("everyone")->second!="rw")
-//                    return false;
-//                else
-//                    for (int i = 0; i < dir->getChildren().size(); ++i) {
-//                         authAll(username,dir->getChildren()[i]);
-//                    }
-//            }
-//
-//        }
-//        else{
-//            if(dir->getPermissions().find(username)->second!="rw")
-//                return false;
-//        }
-//    }
+    void authAll(string username, tomFile *dir) {
+
+        if (dir == NULL) {
+            return;
+        }
+        if (dir->getPermissions().find(username) == dir->getPermissions().end()) {
+            //找下everyone
+            if (dir->getPermissions().find("everyone") == dir->getPermissions().end()) {
+                qualification = false;
+                return;
+            }
+            else {
+                if (dir->getPermissions().find("everyone")->second != "rw") {
+                    qualification = false;
+                    return;
+                }
+                else {
+                    for (int i = 0; i < dir->getChildren().size(); ++i) {
+                        authAll(username, dir->getChildren()[i]);
+                    }
+                }
+            }
+        }
+        else {
+            if (dir->getPermissions().find(username)->second != "rw") {
+                qualification = false;
+                return;
+            } else {
+                for (int i = 0; i < dir->getChildren().size(); ++i) {
+                    authAll(username, dir->getChildren()[i]);
+                }
+            }
+        }
+    }
 
     /**
      * rmdir命令,删除一个目录,只能是当前路径下的目录,需要鉴权,可以是data/a,b形式
@@ -563,8 +580,10 @@ public:
                 if (file->getType() == "file") {
                     cout << "it's a file,not a dir" << endl;
                 } else {
-                    //TODO 这个与其它不一样 鉴权
-                    if (authUser(username, file) == "rw") {
+                    //默认设置有权
+                    qualification = true;
+                    authAll(username, file);
+                    if (qualification) {
                         for (int i = 0; i < file->getParent()->getChildren().size(); ++i) {
                             if (file->getParent()->getChildren()[i]->getName() == file->getName()) {
                                 file->getParent()->deleteChildren(i);
@@ -581,8 +600,6 @@ public:
                 cout << "this dir is not existed" << endl;
         }
     }
-
-
 };
 
 

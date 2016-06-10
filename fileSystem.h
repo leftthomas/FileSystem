@@ -278,7 +278,7 @@ public:
     }
 
     /**
-     * 列出路径下的全部文件,可指定是否详细,含默认参数,不需要做鉴权,因为ls前提就是cd到了此目录,本身做了鉴权
+     * ls命令,列出路径下的全部文件,可指定是否详细,含默认参数,不需要做鉴权,因为ls前提就是cd到了此目录,本身做了鉴权
      */
     void ls(string username, string parameter = "") {
         //第一种情况,无参,显示当前路径下的所有文件简略信息
@@ -298,16 +298,42 @@ public:
                 cout << "no files" << endl;
             } else {
                 for (int i = 0; i < current_file->getChildren().size(); ++i) {
-                    cout << current_file->getChildren()[i]->getName() + "   " << current_file->
-                            getChildren()[i]->getType() + "   " << authUser(username, current_file
-                            ->getChildren()[i]) + "   " << current_file->getChildren()[i]->
-                            getCreateTime() + "   " << current_file->getChildren()[i]->getModifyTime() + "   "
-                    << current_file->getChildren()[i]->getSize() << "byte" << endl;
+                    showFileDetail(current_file->getChildren()[i], username);
                 }
             }
         }
         else {
             cout << "please input the correct command,refer to 'ls+?'" << endl;
+        }
+    }
+
+
+    /**
+     * 显示文件的detail
+     */
+    void showFileDetail(tomFile *file, string username) {
+        cout << file->getName() + "   " << file->getType() + "   " << authUser(username, file) + "   "
+        << file->getCreateTime() + "   " << file->getModifyTime() + "   "
+        << file->getSize() << "byte" << endl;
+    }
+
+    /**
+     * file命令,显示某一个文件的详情,只能是当前路径下的文件,不需要鉴权
+     */
+    void file(string filename, string username) {
+        if (util::findIllegalPath(filename))
+            cout << "the filename|dirname is illegal" << endl;
+        else {
+            tomFile *file;
+            //注意一下这种特殊情况,这是根节点的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + filename, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + filename, current_file);
+            if (file != NULL) {
+                showFileDetail(file, username);
+            } else
+                cout << "this file|dir is not existed" << endl;
         }
     }
 

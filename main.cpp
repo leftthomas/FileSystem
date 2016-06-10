@@ -134,11 +134,17 @@ static void dispatchCommand(string command) {
     else if (command.find("read") == 0) {
 
     }
-
     else if (command == "write")
         cout << "write:write file [dir]——write file" << endl;
-    else if (command == "file")
-        cout << "file:file file|dir [dir]——list file details" << endl;
+
+    else if (command.find("file") == 0) {
+        vector<string> parameters = util::split(command, " ");
+        if (parameters.size() == 2) {
+            fSystem.file(parameters[1], current_user.getUsername());
+        } else {
+            cout << "please input the correct command,refer to 'file+?'" << endl;
+        }
+    }
     else if (command.find("ls") == 0) {
         vector<string> parameters = util::split(command, " ");
         if (parameters.size() == 1) {
@@ -251,7 +257,12 @@ int main() {
                      command.find("file") == 0 || command.find("ls") == 0 || command.find("rmfile") == 0 ||
                      command.find("rmdir") == 0 || command.find("mkfile") == 0 || command.find("mkdir") == 0
                      || command.find("cp") == 0 || command.find("mv") == 0) {
-                dispatchCommand(command);
+                //首先得登录
+                if (current_user.getUsername() == "")
+                    cout << "please login in first" << endl;
+                else {
+                    dispatchCommand(command);
+                }
             }
             else {
                 cout << "command not found" << endl;

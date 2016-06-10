@@ -1,7 +1,7 @@
 #include <iostream>
 #include "util.h"
 #include "user.h"
-
+#include "fileSystem.h"
 using namespace std;
 
 //全局的变量,用来记录当前登录的用户,默认一开始没有用户登录,即username="",password=""
@@ -9,17 +9,6 @@ static user current_user("", "");
 //文件系统
 static fileSystem fSystem;
 
-/**
- * 显示欢迎和说明界面
- */
-void showMenu() {
-    cout << "welcome to the FileSystem" << endl;
-    cout << "login————login the system" << endl;
-    cout << "register————register the system" << endl;
-    cout << "help————get the guide of all commands" << endl;
-    cout << "exit————exit the system" << endl;
-    cout << "copyright@left thomas 2016" << endl;
-}
 
 /**
  * 显示登录之后的界面
@@ -45,7 +34,7 @@ void login() {
         string username;
         cin >> username;
         //检查用户是否存在
-        if (!util::findUser(username)) {
+        if (!fileSystem::findUser(username)) {
             cout << "the user isn't exist,please confirm the username" << endl;
         } else {
             username_success = true;
@@ -54,7 +43,7 @@ void login() {
                 string password;
                 cin >> password;
                 //判断密码是否正确
-                if (!util::isPasswordMatch(username, password)) {
+                if (!fileSystem::isPasswordMatch(username, password)) {
                     cout << "the password isn't correct,please confirm your password" << endl;
                 } else {
                     password_success = true;
@@ -76,7 +65,7 @@ void _register() {
         string username;
         cin >> username;
         //先检查下输入的用户名有没有已经被注册了
-        if (util::findUser(username)) {
+        if (fileSystem::findUser(username)) {
             cout << "the username is existed,please try another" << endl;
         } else {
             //再检查下是否有非法字符
@@ -95,7 +84,7 @@ void _register() {
                         endl;
                     } else {
                         password_success = true;
-                        util::_register(username, password);
+                        fileSystem::_register(username, password);
                         showPanel(username, password);
                     }
                 }
@@ -104,26 +93,37 @@ void _register() {
     }
 }
 
+
 /**
- * 显示帮助文档
- */
-void help() {
-    cout << "cd:cd dir——change directory" << endl;
-    cout << "exit:exit——exit the system" << endl;
-    cout << "login:login——login the system" << endl;
-    cout << "pwd:pwd——print working directory" << endl;
-    cout << "register:register——register the system" << endl;
-    cout << "help:help——get the guide of all commands" << endl;
-    cout << "read:read file [dir]——read file" << endl;
-    cout << "write:write file [dir]——write file" << endl;
-    cout << "file:file file|dir [dir]——list file details" << endl;
-    cout << "ls:ls [-la] [dir]——list directory contents" << endl;
-    cout << "rmfile:rmfile filename [dir]——remove file" << endl;
-    cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
-    cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;
-    cout << "mkdir:mkdir dirname permissions[rw|r|x] [dir]——make directory" << endl;
-    cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
-    cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" << endl;
+    * 命令分发,这是一个大部分命令的总分派函数,承担很大任务量,需要先做command的校验,再做用户鉴权
+    */
+static void dispatchCommand(string command) {
+    //TODO 记得做用户鉴权
+    if (command == "cd")
+        cout << "cd:cd dir——change directory" << endl;
+    else if (command == "read")
+        cout << "read:read file [dir]——read file" << endl;
+    else if (command == "write")
+        cout << "write:write file [dir]——write file" << endl;
+    else if (command == "file")
+        cout << "file:file file|dir [dir]——list file details" << endl;
+    else if (command == "ls")
+        cout << "ls:ls [-la] [dir]——list directory contents" << endl;
+    else if (command == "rmfile")
+        cout << "rmfile:rmfile filename [dir]——remove file" << endl;
+    else if (command == "rmdir")
+        cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
+    else if (command == "mkfile")
+        cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;
+    else if (command == "mkdir")
+        cout << "mkdir:mkdir dirname permissions[rw|r|x] [dir]——make directory" << endl;
+    else if (command == "cp")
+        cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
+    else if (command == "mv")
+        cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
+        endl;
+    else
+        cout << "command error" << endl;
 }
 
 /**
@@ -133,13 +133,18 @@ void _exit() {
     //记得退出系统的时候把当前用户给清除了
     current_user.setUsername("");
     current_user.setPassword("");
+    //TODO system clear
     cout << "the system is exited" << endl;
 }
 
 
+/**
+ * 主函数
+ */
 int main() {
-    showMenu();
-    fSystem.init();
+    util::showMenu();
+
+    //TODO system init
 
     bool over = false;
     string command;
@@ -155,7 +160,7 @@ int main() {
                 _register();
             }
             else if (command == "help") {
-                help();
+                util::help();
             }
             else if (command == "exit") {
                 _exit();
@@ -177,7 +182,7 @@ int main() {
                      command.find("file") == 0 || command.find("ls") == 0 || command.find("rmfile") == 0 ||
                      command.find("rmdir") == 0 || command.find("mkfile") == 0 || command.find("mkdir") == 0
                      || command.find("cp") == 0 || command.find("mv") == 0) {
-                util::dispatchCommand(command);
+                dispatchCommand(command);
             }
             else {
                 cout << "command not found" << endl;
@@ -185,4 +190,7 @@ int main() {
         }
     }
     return 0;
+
 }
+
+

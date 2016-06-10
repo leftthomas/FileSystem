@@ -6,12 +6,26 @@
 #define FILESYSTEM_UTIL_H
 
 #include <string>
-#include "fileSystem.h"
 using namespace std;
 
 class util {
 
 public:
+
+
+    /**
+ * 显示欢迎和说明界面
+ */
+    static void showMenu() {
+        cout << "welcome to the FileSystem" << endl;
+        cout << "login————login the system" << endl;
+        cout << "register————register the system" << endl;
+        cout << "help————get the guide of all commands" << endl;
+        cout << "exit————exit the system" << endl;
+        cout << "copyright@left thomas 2016" << endl;
+    }
+
+
     /**
      * 查找某个字符串中是否有非法字符
      */
@@ -26,30 +40,6 @@ public:
                s.find("\"") != string::npos || s.find("'") != string::npos || s.find(",") != string::npos ||
                s.find("?") != string::npos || s.find("<") != string::npos || s.find(">") != string::npos ||
                s.find("/") != string::npos;
-    }
-
-    /**
-     *  查找是否存在此用户
-     */
-    static bool findUser(string username) {
-        //TODO
-        return true;
-    }
-
-    /**
-     * 判断密码与对应用户名是否匹配
-     */
-    static bool isPasswordMatch(string username, string password) {
-        //TODO
-        return true;
-    }
-
-    /**
-     * 用户注册
-     */
-    static bool _register(string username, string password) {
-        //TODO
-        return true;
     }
 
     /**
@@ -104,35 +94,26 @@ public:
     }
 
     /**
-     * 命令分发,这是一个大部分命令的总分派函数,承担很大任务量,需要先做command的校验,再做用户鉴权
-     */
-    static void dispatchCommand(string command) {
-        //TODO 记得做用户鉴权
-        if (command == "cd")
-            cout << "cd:cd dir——change directory" << endl;
-        else if (command == "read")
-            cout << "read:read file [dir]——read file" << endl;
-        else if (command == "write")
-            cout << "write:write file [dir]——write file" << endl;
-        else if (command == "file")
-            cout << "file:file file|dir [dir]——list file details" << endl;
-        else if (command == "ls")
-            cout << "ls:ls [-la] [dir]——list directory contents" << endl;
-        else if (command == "rmfile")
-            cout << "rmfile:rmfile filename [dir]——remove file" << endl;
-        else if (command == "rmdir")
-            cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
-        else if (command == "mkfile")
-            cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;
-        else if (command == "mkdir")
-            cout << "mkdir:mkdir dirname permissions[rw|r|x] [dir]——make directory" << endl;
-        else if (command == "cp")
-            cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
-        else if (command == "mv")
-            cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
-            endl;
-        else
-            cout << "command error" << endl;
+ * 显示帮助文档
+ */
+    static void help() {
+        cout << "cd:cd dir——change directory" << endl;
+        cout << "exit:exit——exit the system" << endl;
+        cout << "login:login——login the system" << endl;
+        cout << "pwd:pwd——print working directory" << endl;
+        cout << "register:register——register the system" << endl;
+        cout << "help:help——get the guide of all commands" << endl;
+        cout << "read:read file [dir]——read file" << endl;
+        cout << "write:write file [dir]——write file" << endl;
+        cout << "file:file file|dir [dir]——list file details" << endl;
+        cout << "ls:ls [-la] [dir]——list directory contents" << endl;
+        cout << "rmfile:rmfile filename [dir]——remove file" << endl;
+        cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
+        cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;
+        cout << "mkdir:mkdir dirname permissions[rw|r|x] [dir]——make directory" << endl;
+        cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
+        cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
+        endl;
     }
 
 };

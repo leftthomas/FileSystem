@@ -74,7 +74,8 @@ public:
         tomFile::type = type;
     }
 
-    map<string, string> getPermissions() const {
+
+    const map<string, string> &getPermissions() const {
         return permissions;
     }
 
@@ -131,7 +132,7 @@ public:
     }
 
 
-    vector<tomFile *> getChildren() const {
+    const vector<tomFile *> &getChildren() const {
         return children;
     }
 

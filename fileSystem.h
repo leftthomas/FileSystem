@@ -13,11 +13,11 @@ using namespace std;
 class fileSystem {
 
 private:
-    //当前路径
-    string current_path;
     //根节点
     tomFile *root;
 
+    //当前节点,这个变量可以方便后续使用
+    tomFile *current_file;
 public:
 
 
@@ -79,45 +79,12 @@ public:
         return success;
     }
 
-
-    /**
-     * 用户鉴权,用来判断user是否有权访问或操作此目录或文件
-     * 0:无权限
-     * 1:只读
-     * 2:读写
-     */
-    int authUser(string username, tomFile file) {
-//        //没找到此用户
-        if (file.getPermissions().find(username) == file.getPermissions().end()) {
-            //找下everyone
-            if (file.getPermissions().find("everyone") == file.getPermissions().end()) {
-                return 0;
-            } else {
-                if (file.getPermissions().find("everyone")->second == "x")
-                    return 0;
-                else if (file.getPermissions().find("everyone")->second == "r")
-                    return 1;
-                else if (file.getPermissions().find("everyone")->second == "rw")
-                    return 2;
-            }
-        }
-        else {
-            if (file.getPermissions().find(username)->second == "x")
-                return 0;
-            else if (file.getPermissions().find(username)->second == "r")
-                return 1;
-            else if (file.getPermissions().find(username)->second == "rw")
-                return 2;
-        }
-        return true;
-    }
-
     /**
     * 创建文件系统函数,初始化
     */
-    fileSystem() : root(0), current_path("/") { }
+    fileSystem() : root(0), current_file(0) { }
 
-    fileSystem(tomFile *node) : root(node), current_path("/") { }
+    fileSystem(tomFile *node) : root(node), current_file(node) { }
 
     /**
      * 析构函数,记得释放内存
@@ -149,42 +116,13 @@ public:
         }
     }
 
-/**
-     * 添加文件,只有在type为dir时才有用
-     * 4:表示此文件不是dir
-     * 0:表示无权限
-     * 1:表示此目录只读
-     * 2:表示同名文件已存在
-     * 3:表示添加成功
-     */
-    int addFile(tomFile *file, tomFile *parent, string username) {
-//        if (parent->getType() != "dir")
-//            return 4;
-//        else if (authUser(username, parent) == 0) {
-//            return 0;
-//        }
-//        else if (authUser(username, parent) == 1) {
-//            return 1;
-//        }
-//        else if (authUser(username, parent) == 2) {
-//            for (int i = 0; i < parent.getChildren().size(); ++i) {
-//                if (parent.getChildren()[i]->getName() == file.getName()) {
-//                    return 2;
-//                }
-//            }
-//            //表示没有找到同名文件,这时候可以添加了
-//            parent->getChildren().push_back(file);
-//        }
-//        return 3;
+
+    tomFile *getCurrent_file() const {
+        return current_file;
     }
 
-
-    const string &getCurrent_path() const {
-        return current_path;
-    }
-
-    void setCurrent_path(const string &current_path) {
-        fileSystem::current_path = current_path;
+    void setCurrent_file(tomFile *current_file) {
+        fileSystem::current_file = current_file;
     }
 
     tomFile *getRoot() const {
@@ -217,6 +155,80 @@ public:
         // 将查找到的节点指针返回，也有可能没有找到，此时temp为NULL
         return temp;
     }
+
+
+    /*
+     * 显示文件系统当前路径
+     */
+    string getCurrent_path() {
+        //根节点下面的那些文件要注意一下,比较特殊,因为根节点的名字刚好是/
+        if (current_file->getParent() != root)
+            return current_file->getLocation() + "/" + current_file->getName();
+        else
+            return current_file->getLocation() + current_file->getName();
+    }
+
+    /**
+   * 用户鉴权,用来判断user是否有权访问或操作此目录或文件
+   * 0:无权限
+   * 1:只读
+   * 2:读写
+   */
+//    int authUser(string username, tomFile file) {
+////        //没找到此用户
+//        if (file.getPermissions().find(username) == file.getPermissions().end()) {
+//            //找下everyone
+//            if (file.getPermissions().find("everyone") == file.getPermissions().end()) {
+//                return 0;
+//            } else {
+//                if (file.getPermissions().find("everyone")->second == "x")
+//                    return 0;
+//                else if (file.getPermissions().find("everyone")->second == "r")
+//                    return 1;
+//                else if (file.getPermissions().find("everyone")->second == "rw")
+//                    return 2;
+//            }
+//        }
+//        else {
+//            if (file.getPermissions().find(username)->second == "x")
+//                return 0;
+//            else if (file.getPermissions().find(username)->second == "r")
+//                return 1;
+//            else if (file.getPermissions().find(username)->second == "rw")
+//                return 2;
+//        }
+//        return true;
+//    }
+
+/**
+     * 添加文件,只有在type为dir时才有用
+     * 4:表示此文件不是dir
+     * 0:表示无权限
+     * 1:表示此目录只读
+     * 2:表示同名文件已存在
+     * 3:表示添加成功
+     */
+//    int addFile(tomFile *file, tomFile *parent, string username) {
+//        if (parent->getType() != "dir")
+//            return 4;
+//        else if (authUser(username, parent) == 0) {
+//            return 0;
+//        }
+//        else if (authUser(username, parent) == 1) {
+//            return 1;
+//        }
+//        else if (authUser(username, parent) == 2) {
+//            for (int i = 0; i < parent.getChildren().size(); ++i) {
+//                if (parent.getChildren()[i]->getName() == file.getName()) {
+//                    return 2;
+//                }
+//            }
+//            //表示没有找到同名文件,这时候可以添加了
+//            parent->getChildren().push_back(file);
+//        }
+//        return 3;
+//    }
+
 };
 
 

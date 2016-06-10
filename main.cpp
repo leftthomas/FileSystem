@@ -9,17 +9,27 @@ static user current_user("", "");
 //文件系统
 static fileSystem fSystem;
 
+/**
+ * 命令行提示符
+ */
+void showTip() {
+    if (current_user.getUsername() != "")
+        //登录之后的操作都要显示这一行字
+        cout << current_user.getUsername() + "$>>";
+}
+
 
 /**
  * 显示登录之后的界面
  */
 void showPanel(string username, string password) {
     //先清屏
-    //TODO
     system("clear");
     //更新下当前登录的用户
     current_user.setUsername(username);
     current_user.setPassword(password);
+    //记得更新下当前节点,第二个节点刚好是home
+    fSystem.setCurrent_file(fSystem.getRoot()->getChildren()[1]);
     cout << "welcome to the MainPane,Enjoy it" << endl;
 }
 
@@ -27,6 +37,9 @@ void showPanel(string username, string password) {
  * 用户登录
  */
 void login() {
+    //先清一下,防止调用登录的时候还显示tip
+    current_user.setUsername("");
+    current_user.setPassword("");
     bool username_success = false;
     bool password_success = false;
     while (!username_success) {
@@ -58,6 +71,9 @@ void login() {
  * 用户注册,register是关键字,所以命名的时候只能前面加_了
  */
 void _register() {
+    //先清一下,防止调用注册的时候还显示tip
+    current_user.setUsername("");
+    current_user.setPassword("");
     bool username_success = false;
     bool password_success = false;
     while (!username_success) {
@@ -165,9 +181,11 @@ int main() {
     bool over = false;
     string command;
     while (!over) {
+
         getline(cin, command);
         //首尾去下空格
         util::trim(command);
+
         if (command.length() > 0) {
             if (command == "login") {
                 login();
@@ -190,7 +208,7 @@ int main() {
                 if (current_user.getUsername() == "")
                     cout << "please login in first" << endl;
                 else {
-                    //TODO
+                    cout << fSystem.getCurrent_path() << endl;
                 }
             } else if (command == "show") {
                 //做下登录验证
@@ -212,6 +230,7 @@ int main() {
                 cout << "command not found" << endl;
             }
         }
+        showTip();
     }
     return 0;
 }

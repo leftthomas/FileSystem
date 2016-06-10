@@ -2,6 +2,7 @@
 #include "util.h"
 #include "user.h"
 #include "fileSystem.h"
+#include "htree.h"
 using namespace std;
 
 //全局的变量,用来记录当前登录的用户,默认一开始没有用户登录,即username="",password=""
@@ -138,6 +139,27 @@ void _exit() {
 }
 
 
+void testhd() {
+
+    typedef htree_node<string> node_type;
+    typedef htree<string> tree_type;
+    node_type *one = new node_type("one");
+
+    tree_type::iterator iter(one);
+    tree_type tr1(one);
+    tree_type::iterator two = tr1.insert(iter, "two");
+    tree_type::iterator three = tr1.insert(iter, "three");
+    tr1.insert(two, "apple");
+    tr1.insert(two, "banana");
+    tr1.insert(two, "peach");
+    tr1.insert(three, "china");
+    tr1.insert(three, "england");
+    tr1.pre_recurs_render(tr1.root, 1);
+}
+
+
+
+
 /**
  * 主函数
  */
@@ -186,11 +208,16 @@ int main() {
             }
             else {
                 cout << "command not found" << endl;
+
+
+                testhd();
+
             }
         }
     }
     return 0;
-
 }
+
+
 
 

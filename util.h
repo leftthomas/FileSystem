@@ -79,7 +79,7 @@ public:
         else if (command == "read")
             cout << "read:read file——read file" << endl;
         else if (command == "write")
-            cout << "write:write file [dir]——write file" << endl;
+            cout << "write:write file——write file" << endl;
         else if (command == "file")
             cout << "file:file file|dir [dir]——list file details" << endl;
         else if (command == "ls")
@@ -123,7 +123,7 @@ public:
         cout << "register:register——register the system" << endl;
         cout << "help:help——get the guide of all commands" << endl;
         cout << "read:read file——read file" << endl;
-        cout << "write:write file [dir]——write file" << endl;
+        cout << "write:write file——write file" << endl;
         cout << "file:file file|dir [dir]——list file details" << endl;
         cout << "ls:ls [-la]——list directory contents" << endl;
         cout << "rmfile:rmfile filename [dir]——remove file" << endl;

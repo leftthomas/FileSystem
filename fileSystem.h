@@ -93,7 +93,6 @@ public:
         return success;
     }
 
-
     //这个函数只在初始化的时候调用,其他时候都需要鉴权
     void insert(tomFile *parent, tomFile *tmp) {
         //先看下有没有同名文件
@@ -125,7 +124,6 @@ public:
             delete some;
         }
     }
-
 
     tomFile *getCurrent_file() const {
         return current_file;
@@ -361,7 +359,43 @@ public:
                         } else
                             cout << file->getContent() << endl;
                     } else {
-                        cout << "you have no access to this file" << endl;
+                        cout << "you have no access to read this file" << endl;
+                    }
+                }
+            } else
+                cout << "this file is not existed" << endl;
+        }
+    }
+
+    /**
+     * write命令,其他情况同read
+     */
+    void write(string filename, string username) {
+        if (util::findIllegalPath(filename))
+            cout << "the filename is illegal" << endl;
+        else {
+            tomFile *file;
+            //注意一下这种特殊情况,这是根节点的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + filename, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + filename, current_file);
+            if (file != NULL) {
+                if (file->getType() == "dir") {
+                    cout << "it's a dir,not a file" << endl;
+                } else {
+                    //鉴权
+                    if (authUser(username, file) == "rw") {
+                        //write
+                        cout << "===here are the contents of this file,you can append some other words to it===" <<
+                        endl;
+                        cout << file->getContent() << endl;
+                        cout << "input:";
+                        string s;
+                        getline(cin, s);
+                        file->setContent(file->getContent() + s);
+                    } else {
+                        cout << "you have no access to write this file" << endl;
                     }
                 }
             } else

@@ -78,26 +78,41 @@ public:
 //        return true;
     }
 
-
     /**
     * 创建文件系统函数,初始化
     */
-    fileSystem() {
-        //指定root文件的权限
-//        map<string, string> rootp;
-//        rootp.insert(map<string, string>::value_type("root", "rw"));
-//        //根节点没location,parent
-//        tomFile _root = tomFile("dir", "", "/", rootp, 0);
-//        root = &_root;
-//        current_path = "/";
-//        //配置文件
-//        tomFile config = tomFile("file", "/", "config.txt", rootp, &_root);
-//        //设置配置文件里面的用户数据
-//        config.setContent("root 123456;");
-//        addFile(config, _root, "root");
-//        //home文件夹
-//        tomFile home = tomFile("dir", "/", "home", rootp, &_root);
-//        addFile(home, _root, "root");
+    fileSystem() : root(0), current_path("/") { }
+
+    fileSystem(tomFile *node) : root(node), current_path("/") { }
+
+    /**
+     * 析构函数,记得释放内存
+     */
+    ~fileSystem() {
+        destroy(root);
+    }
+
+    //注意传position的引用
+    void insert(tomFile *parent, tomFile *tmp) {
+        parent->addChildren(tmp);
+    }
+
+    //先序递归输出
+    void pre_recurs_render(tomFile *some, unsigned recurs_level) {
+        for (int i = 0; i < recurs_level; i++)
+            cout << "  ";
+        cout << some->getName() << endl;
+        for (unsigned i = 0; i < some->getChildren().size(); i++)
+            pre_recurs_render(some->getChildren()[i], recurs_level + 1);
+    }
+
+    //后序删除
+    void destroy(tomFile *some) {
+        for (unsigned i = 0; i < some->getChildren().size(); i++)
+            destroy(some->getChildren()[i]);
+        if (some) {
+            delete some;
+        }
     }
 
 /**
@@ -127,6 +142,23 @@ public:
 //            parent->getChildren().push_back(file);
 //        }
 //        return 3;
+    }
+
+
+    const string &getCurrent_path() const {
+        return current_path;
+    }
+
+    void setCurrent_path(const string &current_path) {
+        fileSystem::current_path = current_path;
+    }
+
+    tomFile *getRoot() const {
+        return root;
+    }
+
+    void setRoot(tomFile *root) {
+        fileSystem::root = root;
     }
 };
 

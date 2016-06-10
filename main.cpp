@@ -2,7 +2,6 @@
 #include "util.h"
 #include "user.h"
 #include "fileSystem.h"
-#include "htree.h"
 using namespace std;
 
 //全局的变量,用来记录当前登录的用户,默认一开始没有用户登录,即username="",password=""
@@ -138,23 +137,23 @@ void _exit() {
     cout << "the system is exited" << endl;
 }
 
-
-void testhd() {
-
-    typedef htree_node<string> node_type;
-    typedef htree<string> tree_type;
-    node_type *one = new node_type("one");
-
-    tree_type::iterator iter(one);
-    tree_type tr1(one);
-    tree_type::iterator two = tr1.insert(iter, "two");
-    tree_type::iterator three = tr1.insert(iter, "three");
-    tr1.insert(two, "apple");
-    tr1.insert(two, "banana");
-    tr1.insert(two, "peach");
-    tr1.insert(three, "china");
-    tr1.insert(three, "england");
-    tr1.pre_recurs_render(tr1.root, 1);
+/**
+ * 初始化文件系统
+ */
+void initFileSystem() {
+    //指定root文件的权限
+    //根节点没location,parent
+    tomFile *_root = new tomFile("dir", "", "/", pair<string, string>("root", "rw"), 0);
+    fSystem = *(new fileSystem(_root));
+    //配置文件
+    tomFile *config = new tomFile("file", "/", "config.txt", pair<string, string>("root", "rw"), _root);
+    //设置配置文件里面的用户数据
+    (*config).setContent("root 123456;");
+    fSystem.insert(_root, config);
+    //home文件夹
+    tomFile *home = new tomFile("dir", "/", "home", pair<string, string>("root", "rw"), _root);
+    fSystem.insert(_root, home);
+    fSystem.pre_recurs_render(fSystem.getRoot(), 1);
 }
 
 
@@ -209,8 +208,7 @@ int main() {
             else {
                 cout << "command not found" << endl;
 
-
-                testhd();
+                initFileSystem();
 
             }
         }

@@ -41,12 +41,13 @@ public:
     /**
         * 指定permissions的构造函数
         */
-    tomFile(const string &type, const string &location, const string &name, const map<string, string> &permissions,
-            tomFile *parent) : type(type), location(location), name(name), permissions(permissions), parent(parent) {
+    tomFile(const string &type, const string &location, const string &name, const pair<string, string> &permission,
+            tomFile *parent) : type(type), location(location), name(name), parent(parent) {
         size = 0;//刚创建的时候大小为 0 byte
         time(&createTime);//指定为当前系统时间,下同
         time(&modifyTime);
         content = "";//刚创建时无内容
+        permissions.insert(permission);
     }
 
 
@@ -77,10 +78,6 @@ public:
 
     const map<string, string> &getPermissions() const {
         return permissions;
-    }
-
-    void setPermissions(const map<string, string> &permissions) {
-        tomFile::permissions = permissions;
     }
 
     long getSize() const {
@@ -131,13 +128,8 @@ public:
         tomFile::content = content;
     }
 
-
     const vector<tomFile *> &getChildren() const {
         return children;
-    }
-
-    void setChildren(const vector<tomFile *> &children) {
-        tomFile::children = children;
     }
 
     tomFile *getParent() const {
@@ -146,6 +138,20 @@ public:
 
     void setParent(tomFile *parent) {
         tomFile::parent = parent;
+    }
+
+    /**
+    * 这个函数要特殊注意,不能是set而是add,搞了好久,不然添加的话很麻烦
+    */
+    void addChildren(tomFile *child) {
+        children.push_back(child);
+    }
+
+    /**
+   * 这个函数也要特殊注意,不能是set而是add
+   */
+    void addPermissions(const pair<string, string> &permission) {
+        permissions.insert(permission);
     }
 };
 

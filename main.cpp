@@ -116,7 +116,7 @@ void _register() {
 
 
 /**
-    * 命令分发,这是一个大部分命令的总分派函数,承担很大任务量,需要先做command的校验,再做用户鉴权
+    * 命令分发,这是一个大部分命令的总分派函数,承担很大任务量,需要先做command的校验,用户鉴权在filesystem中做
     */
 static void dispatchCommand(string command) {
 
@@ -131,14 +131,25 @@ static void dispatchCommand(string command) {
         }
     }
         //TODO
-    else if (command == "read")
-        cout << "read:read file [dir]——read file" << endl;
+    else if (command.find("read") == 0) {
+
+    }
+
     else if (command == "write")
         cout << "write:write file [dir]——write file" << endl;
     else if (command == "file")
         cout << "file:file file|dir [dir]——list file details" << endl;
-    else if (command == "ls")
-        cout << "ls:ls [-la] [dir]——list directory contents" << endl;
+    else if (command.find("ls") == 0) {
+        vector<string> parameters = util::split(command, " ");
+        if (parameters.size() == 1) {
+            fSystem.ls(current_user.getUsername());
+        } else if (parameters.size() == 2) {
+            fSystem.ls(current_user.getUsername(), parameters[1]);
+        } else {
+            cout << "please input the correct command,refer to 'ls+?'" << endl;
+        }
+    }
+
     else if (command == "rmfile")
         cout << "rmfile:rmfile filename [dir]——remove file" << endl;
     else if (command == "rmdir")

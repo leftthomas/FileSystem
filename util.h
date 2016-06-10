@@ -83,7 +83,7 @@ public:
         else if (command == "file")
             cout << "file:file file|dir [dir]——list file details" << endl;
         else if (command == "ls")
-            cout << "ls:ls [-la] [dir]——list directory contents" << endl;
+            cout << "ls:ls [-la]——list directory contents" << endl;
         else if (command == "rmfile")
             cout << "rmfile:rmfile filename [dir]——remove file" << endl;
         else if (command == "rmdir")
@@ -125,7 +125,7 @@ public:
         cout << "read:read file [dir]——read file" << endl;
         cout << "write:write file [dir]——write file" << endl;
         cout << "file:file file|dir [dir]——list file details" << endl;
-        cout << "ls:ls [-la] [dir]——list directory contents" << endl;
+        cout << "ls:ls [-la]——list directory contents" << endl;
         cout << "rmfile:rmfile filename [dir]——remove file" << endl;
         cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
         cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;

@@ -43,7 +43,8 @@ public:
         */
     tomFile(const string &type, const string &location, const string &name, const pair<string, string> &permission,
             tomFile *parent) : type(type), location(location), name(name), parent(parent) {
-        size = 0;//刚创建的时候大小为 0 byte
+        //刚创建的时候大小,以178byte计算
+        size = 178;
         time(&createTime);//指定为当前系统时间,下同
         time(&modifyTime);
         content = "";//刚创建时无内容
@@ -58,7 +59,7 @@ public:
                                                                                                location(location),
                                                                                                name(name),
                                                                                                parent(parent) {
-        size = 0;//刚创建的时候大小为 0 byte
+        size = 178;
         time(&createTime);//指定为当前系统时间,下同
         time(&modifyTime);
         content = "";
@@ -81,7 +82,8 @@ public:
     }
 
     long getSize() const {
-        return size;
+        //简单的以content内容大小来计算
+        return 178 + content.length();
     }
 
     void setSize(long size) {
@@ -96,16 +98,16 @@ public:
         tomFile::location = location;
     }
 
-    time_t getCreateTime() const {
-        return createTime;
+    string getCreateTime() const {
+        return ctime(&createTime);
     }
 
     void setCreateTime(time_t createTime) {
         tomFile::createTime = createTime;
     }
 
-    time_t getModifyTime() const {
-        return modifyTime;
+    string getModifyTime() const {
+        return ctime(&modifyTime);
     }
 
     void setModifyTime(time_t modifyTime) {

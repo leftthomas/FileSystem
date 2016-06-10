@@ -96,7 +96,16 @@ public:
 
     //这个函数只在初始化的时候调用,其他时候都需要鉴权
     void insert(tomFile *parent, tomFile *tmp) {
-        parent->addChildren(tmp);
+        //先看下有没有同名文件
+        bool found = false;
+        for (int i = 0; i < parent->getChildren().size(); ++i) {
+            if (parent->getChildren()[i]->getName() == tmp->getName()) {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            parent->addChildren(tmp);
     }
 
     //先序递归输出
@@ -191,7 +200,7 @@ public:
     /**
      * cd命令,其实质是改变current_file
      */
-    int changeDirectory(string username, string path) {
+    void changeDirectory(string username, string path) {
         if (util::findIllegalPath(path)) {
             cout << "the path is illegal" << endl;
         } else {
@@ -204,8 +213,8 @@ public:
                 file = findFileByPath(current_file->getPath() + "/" + path, current_file);
             if (file != NULL) {
                 //鉴权
-                if (authUser(username, file) == 0)
-                    authOut(0);
+                if (authUser(username, file) == "x")
+                    authOut("x");
                 else {
                     //有权操作
                     if (file->getType() == "file")
@@ -219,8 +228,8 @@ public:
                 file = findFileByPath(path, root);
                 if (file != NULL) {
                     //鉴权
-                    if (authUser(username, file) == 0)
-                        authOut(0);
+                    if (authUser(username, file) == "x")
+                        authOut("x");
                     else {
                         //有权操作
                         if (file->getType() == "file")
@@ -239,46 +248,67 @@ public:
 
     /**
    * 用户鉴权,用来判断user是否有权访问或操作此目录或文件
-   * 0:无权限
-   * 1:只读
-   * 2:读写
+   * x:无权限
+   * r:只读
+   * rw:读写
    */
-    int authUser(string username, tomFile *file) {
+    string authUser(string username, tomFile *file) {
         //没找到此用户
         if (file->getPermissions().find(username) == file->getPermissions().end()) {
             //找下everyone
-            if (file->getPermissions().find("everyone") == file->getPermissions().end()) {
-                return 0;
-            } else {
-                if (file->getPermissions().find("everyone")->second == "x")
-                    return 0;
-                else if (file->getPermissions().find("everyone")->second == "r")
-                    return 1;
-                else if (file->getPermissions().find("everyone")->second == "rw")
-                    return 2;
-            }
+            if (file->getPermissions().find("everyone") == file->getPermissions().end())
+                return "x";
+            else
+                return file->getPermissions().find("everyone")->second;
         }
-        else {
-            if (file->getPermissions().find(username)->second == "x")
-                return 0;
-            else if (file->getPermissions().find(username)->second == "r")
-                return 1;
-            else if (file->getPermissions().find(username)->second == "rw")
-                return 2;
-        }
-        return true;
+        else
+            return file->getPermissions().find(username)->second;
     }
 
     /**
      * 根据不同权限输出不同提示
      */
-    void authOut(int q) {
-        if (q == 0)
+    void authOut(string q) {
+        if (q == "x")
             cout << "you have no access to this file|dir" << endl;
-        else if (q == 1)
+        else if (q == "r")
             cout << "you can read this file|dir only" << endl;
-        else if (q == 2)
+        else if (q == "rw")
             cout << "you can read or write this file|dir" << endl;
+    }
+
+    /**
+     * 列出路径下的全部文件,可指定是否详细,含默认参数,不需要做鉴权,因为ls前提就是cd到了此目录,本身做了鉴权
+     */
+    void ls(string username, string parameter = "") {
+        //第一种情况,无参,显示当前路径下的所有文件简略信息
+        if (parameter == "") {
+            if (current_file->getChildren().size() == 0) {
+                cout << "no files" << endl;
+            } else {
+                for (int i = 0; i < current_file->getChildren().size(); ++i) {
+                    cout << current_file->getChildren()[i]->getName() + "   ";
+                }
+                cout << endl;
+            }
+        }
+            //第二种情况,一个参数为"-la",显示当前路径下的所有文件详细信息
+        else if (parameter == "-la") {
+            if (current_file->getChildren().size() == 0) {
+                cout << "no files" << endl;
+            } else {
+                for (int i = 0; i < current_file->getChildren().size(); ++i) {
+                    cout << current_file->getChildren()[i]->getName() + "   " << current_file->
+                            getChildren()[i]->getType() + "   " << authUser(username, current_file
+                            ->getChildren()[i]) + "   " << current_file->getChildren()[i]->
+                            getCreateTime() + "   " << current_file->getChildren()[i]->getModifyTime() + "   "
+                    << current_file->getChildren()[i]->getSize() << "byte" << endl;
+                }
+            }
+        }
+        else {
+            cout << "please input the correct command,refer to 'ls+?'" << endl;
+        }
     }
 
 /**

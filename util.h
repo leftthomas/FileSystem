@@ -44,6 +44,21 @@ public:
     }
 
     /**
+     * 判断是否是有效的文件路径
+     */
+    static bool findIllegalPath(string s) {
+        return s.find("!") != string::npos || s.find("~") != string::npos || s.find("`") != string::npos ||
+               s.find("#") != string::npos || s.find("@") != string::npos || s.find("$") != string::npos ||
+               s.find("%") != string::npos || s.find("^") != string::npos || s.find("&") != string::npos ||
+               s.find("*") != string::npos || s.find("(") != string::npos || s.find(")") != string::npos ||
+               s.find("+") != string::npos || s.find("{") != string::npos || s.find("}") != string::npos ||
+               s.find("[") != string::npos || s.find("]") != string::npos || s.find("|") != string::npos ||
+               s.find("\\") != string::npos || s.find(":") != string::npos || s.find(";") != string::npos ||
+               s.find("\"") != string::npos || s.find("'") != string::npos || s.find(",") != string::npos ||
+               s.find("?") != string::npos || s.find("<") != string::npos || s.find(">") != string::npos;
+    }
+
+    /**
      * 根据不同命令显示不同命令usage
      */
     static void help(string command) {

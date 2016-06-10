@@ -20,7 +20,7 @@ void showTip() {
 
 
 /**
- * 显示登录之后的界面
+ * 显示登录或注册之后的界面
  */
 void showPanel(string username, string password) {
     //先清屏
@@ -29,7 +29,12 @@ void showPanel(string username, string password) {
     current_user.setUsername(username);
     current_user.setPassword(password);
     //记得更新下当前节点,第二个节点刚好是home
-    fSystem.setCurrent_file(fSystem.getRoot()->getChildren()[1]);
+    //根据每个用户不同名字命名的子文件夹,初始权限是当前用户可读可写,everyone可读不可写
+    tomFile *user_dir = new tomFile("dir", "/home", current_user.getUsername(), pair<string,
+            string>(current_user.getUsername(), "rw"), fSystem.getRoot()->getChildren()[1]);
+    user_dir->addPermissions(pair<string, string>("everyone", "r"));
+    fSystem.insert(fSystem.getRoot()->getChildren()[1], user_dir);
+    fSystem.setCurrent_file(user_dir);
     cout << "welcome to the MainPane,Enjoy it" << endl;
 }
 
@@ -114,9 +119,18 @@ void _register() {
     * 命令分发,这是一个大部分命令的总分派函数,承担很大任务量,需要先做command的校验,再做用户鉴权
     */
 static void dispatchCommand(string command) {
-    //TODO 记得做用户鉴权
-    if (command == "cd")
-        cout << "cd:cd dir——change directory" << endl;
+
+    if (command.find("cd") == 0) {
+        vector<string> paths = util::split(command, " ");
+        if (paths.size() == 1) {
+            cout << "please input path after cd" << endl;
+        } else if (paths.size() == 2) {
+            fSystem.changeDirectory(current_user.getUsername(), paths[1]);
+        } else {
+            cout << "please input the correct command,refer to 'cd+?'" << endl;
+        }
+    }
+        //TODO
     else if (command == "read")
         cout << "read:read file [dir]——read file" << endl;
     else if (command == "write")
@@ -167,6 +181,8 @@ void initFileSystem() {
     fSystem.insert(_root, config);
     //home文件夹
     tomFile *home = new tomFile("dir", "/", "home", pair<string, string>("root", "rw"), _root);
+    //这个目录对非root用户只读
+    home->addPermissions(pair<string, string>("everyone", "r"));
     fSystem.insert(_root, home);
 }
 

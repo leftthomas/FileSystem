@@ -22,6 +22,20 @@ public:
 
 
     /**
+   * 创建文件系统函数,初始化
+   */
+    fileSystem() : root(0), current_file(0) { }
+
+    fileSystem(tomFile *node) : root(node), current_file(node) { }
+
+    /**
+     * 析构函数,记得释放内存
+     */
+    ~fileSystem() {
+        destroy(root);
+    }
+
+    /**
  *  查找是否存在此用户,其实质就是读config.txt文件,使用的时候一定要记得查找起点在root,这样设置主要是为了递归调用方便
  */
     bool findUser(string username) {
@@ -79,19 +93,6 @@ public:
         return success;
     }
 
-    /**
-    * 创建文件系统函数,初始化
-    */
-    fileSystem() : root(0), current_file(0) { }
-
-    fileSystem(tomFile *node) : root(node), current_file(node) { }
-
-    /**
-     * 析构函数,记得释放内存
-     */
-    ~fileSystem() {
-        destroy(root);
-    }
 
     //这个函数只在初始化的时候调用,其他时候都需要鉴权
     void insert(tomFile *parent, tomFile *tmp) {
@@ -156,17 +157,85 @@ public:
         return temp;
     }
 
+    /**
+     * 这是通过全路径查找,即/xxx/xxx的形式
+     */
+    tomFile *findFileByPath(string path, tomFile *head) {
+        tomFile *temp = NULL;
+        int i = 0;
+        if (head != NULL) {
+            // 如果路径匹配
+            if (path == head->getPath()) {
+                temp = head;
+            }
+            else {
+                for (i = 0; i < head->getChildren().size() && temp == NULL; ++i) {
+                    // 递归查找子节点
+                    temp = findFileByPath(path, head->getChildren()[i]);
+                }
+            }
+        }
+        // 将查找到的节点指针返回，也有可能没有找到，此时temp为NULL
+        return temp;
+    }
+
 
     /*
      * 显示文件系统当前路径
      */
     string getCurrent_path() {
-        //根节点下面的那些文件要注意一下,比较特殊,因为根节点的名字刚好是/
-        if (current_file->getParent() != root)
-            return current_file->getLocation() + "/" + current_file->getName();
-        else
-            return current_file->getLocation() + current_file->getName();
+        return current_file->getPath();
     }
+
+
+    /**
+     * cd命令,其实质是改变current_file
+     */
+    int changeDirectory(string username, string path) {
+        if (util::findIllegalPath(path)) {
+            cout << "the path is illegal" << endl;
+        } else {
+            tomFile *file;
+            //第一种cd方法,在当前路径下输入子文件夹名就行了,例如left、left/data...
+            //注意一下这种特殊情况,这是根节点的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + path, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + path, current_file);
+            if (file != NULL) {
+                //鉴权
+                if (authUser(username, file) == 0)
+                    authOut(0);
+                else {
+                    //有权操作
+                    if (file->getType() == "file")
+                        cout << "this path is a file,not a dir" << endl;
+                    else
+                        //改变current_file
+                        current_file = file;
+                }
+            } else {
+                //第二种cd方法,输入全路径,例如/home/left
+                file = findFileByPath(path, root);
+                if (file != NULL) {
+                    //鉴权
+                    if (authUser(username, file) == 0)
+                        authOut(0);
+                    else {
+                        //有权操作
+                        if (file->getType() == "file")
+                            cout << "this path is a file,not a dir" << endl;
+                        else
+                            //改变current_file
+                            current_file = file;
+                    }
+                }
+                else
+                    cout << "this path is not existed" << endl;
+            }
+        }
+    }
+
 
     /**
    * 用户鉴权,用来判断user是否有权访问或操作此目录或文件
@@ -174,31 +243,43 @@ public:
    * 1:只读
    * 2:读写
    */
-//    int authUser(string username, tomFile file) {
-////        //没找到此用户
-//        if (file.getPermissions().find(username) == file.getPermissions().end()) {
-//            //找下everyone
-//            if (file.getPermissions().find("everyone") == file.getPermissions().end()) {
-//                return 0;
-//            } else {
-//                if (file.getPermissions().find("everyone")->second == "x")
-//                    return 0;
-//                else if (file.getPermissions().find("everyone")->second == "r")
-//                    return 1;
-//                else if (file.getPermissions().find("everyone")->second == "rw")
-//                    return 2;
-//            }
-//        }
-//        else {
-//            if (file.getPermissions().find(username)->second == "x")
-//                return 0;
-//            else if (file.getPermissions().find(username)->second == "r")
-//                return 1;
-//            else if (file.getPermissions().find(username)->second == "rw")
-//                return 2;
-//        }
-//        return true;
-//    }
+    int authUser(string username, tomFile *file) {
+        //没找到此用户
+        if (file->getPermissions().find(username) == file->getPermissions().end()) {
+            //找下everyone
+            if (file->getPermissions().find("everyone") == file->getPermissions().end()) {
+                return 0;
+            } else {
+                if (file->getPermissions().find("everyone")->second == "x")
+                    return 0;
+                else if (file->getPermissions().find("everyone")->second == "r")
+                    return 1;
+                else if (file->getPermissions().find("everyone")->second == "rw")
+                    return 2;
+            }
+        }
+        else {
+            if (file->getPermissions().find(username)->second == "x")
+                return 0;
+            else if (file->getPermissions().find(username)->second == "r")
+                return 1;
+            else if (file->getPermissions().find(username)->second == "rw")
+                return 2;
+        }
+        return true;
+    }
+
+    /**
+     * 根据不同权限输出不同提示
+     */
+    void authOut(int q) {
+        if (q == 0)
+            cout << "you have no access to this file|dir" << endl;
+        else if (q == 1)
+            cout << "you can read this file|dir only" << endl;
+        else if (q == 2)
+            cout << "you can read or write this file|dir" << endl;
+    }
 
 /**
      * 添加文件,只有在type为dir时才有用

@@ -153,6 +153,21 @@ public:
     void addPermissions(const pair<string, string> &permission) {
         permissions.insert(permission);
     }
+
+    /**
+     * 获取全路径,方便后面使用
+     */
+    string getPath() {
+        //根节点下面的那些文件要注意一下,比较特殊,因为根节点的名字刚好是/
+        if (parent == NULL) {
+            return name;
+        } else {
+            if (parent->getLocation() != "")
+                return location + "/" + name;
+            else
+                return location + name;
+        }
+    }
 };
 
 

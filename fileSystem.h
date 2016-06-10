@@ -93,7 +93,7 @@ public:
         return success;
     }
 
-    //这个函数只在初始化的时候调用,其他时候都需要鉴权
+    //这个函数只在初始化的时候调用不鉴权,其他时候调用都需要鉴权
     void insert(tomFile *parent, tomFile *tmp) {
         //先看下有没有同名文件
         bool found = false;
@@ -165,6 +165,21 @@ public:
     }
 
     /**
+     * 根据文件名找在此dir一层的文件
+     */
+    tomFile *findFileInDir(string filename, tomFile *dir) {
+        if (dir == NULL || dir->getChildren().size() == 0)
+            return NULL;
+        else {
+            for (int i = 0; i < dir->getChildren().size(); ++i) {
+                if (dir->getChildren()[i]->getName() == filename)
+                    return dir->getChildren()[i];
+            }
+        }
+        return NULL;
+    }
+
+    /**
      * 这是通过全路径查找,即/xxx/xxx的形式
      */
     tomFile *findFileByPath(string path, tomFile *head) {
@@ -199,7 +214,7 @@ public:
      * cd命令,其实质是改变current_file
      */
     void changeDirectory(string username, string path) {
-        if (util::findIllegalPath(path)) {
+        if (util::findIllegalCharacter(path, true)) {
             cout << "the path is illegal" << endl;
         } else {
             tomFile *file;
@@ -267,12 +282,12 @@ public:
      * 根据不同权限输出不同提示
      */
     void authOut(string q) {
-        if (q == "x")
-            cout << "you have no access to this file|dir" << endl;
-        else if (q == "r")
+        if (q == "r")
             cout << "you can read this file|dir only" << endl;
         else if (q == "rw")
             cout << "you can read or write this file|dir" << endl;
+        else
+            cout << "you have no access to this file|dir" << endl;
     }
 
     /**
@@ -319,7 +334,7 @@ public:
      * file命令,显示某一个文件的详情,只能是当前路径下的文件,不需要鉴权
      */
     void file(string filename, string username) {
-        if (util::findIllegalPath(filename))
+        if (util::findIllegalCharacter(filename, true))
             cout << "the filename|dirname is illegal" << endl;
         else {
             tomFile *file;
@@ -339,7 +354,7 @@ public:
      * read命令,显示某一个文件的内容,只能是当前路径下的文件,需要鉴权,可以是data/a.txt,b.txt形式
      */
     void read(string filename, string username) {
-        if (util::findIllegalPath(filename))
+        if (util::findIllegalCharacter(filename, true))
             cout << "the filename is illegal" << endl;
         else {
             tomFile *file;
@@ -371,7 +386,7 @@ public:
      * write命令,其他情况同read
      */
     void write(string filename, string username) {
-        if (util::findIllegalPath(filename))
+        if (util::findIllegalCharacter(filename, true))
             cout << "the filename is illegal" << endl;
         else {
             tomFile *file;
@@ -403,35 +418,41 @@ public:
         }
     }
 
-/**
-     * 添加文件,只有在type为dir时才有用
-     * 4:表示此文件不是dir
-     * 0:表示无权限
-     * 1:表示此目录只读
-     * 2:表示同名文件已存在
-     * 3:表示添加成功
+    /**
+     * mkfile命令,有两种形式,一种指定权限,一种不指定,首先自身权限是rw,指定的权限是其他人的访问权everyone,默认rw
+     * 文件建立在当前路径下,需要鉴权,得看current_file是否可写
      */
-//    int addFile(tomFile *file, tomFile *parent, string username) {
-//        if (parent->getType() != "dir")
-//            return 4;
-//        else if (authUser(username, parent) == 0) {
-//            return 0;
-//        }
-//        else if (authUser(username, parent) == 1) {
-//            return 1;
-//        }
-//        else if (authUser(username, parent) == 2) {
-//            for (int i = 0; i < parent.getChildren().size(); ++i) {
-//                if (parent.getChildren()[i]->getName() == file.getName()) {
-//                    return 2;
-//                }
-//            }
-//            //表示没有找到同名文件,这时候可以添加了
-//            parent->getChildren().push_back(file);
-//        }
-//        return 3;
-//    }
+    void mkfile(string filename, string username, string permission = "rw") {
+        //只有dir下才可以新建文件,其实这个不可能....
+        if (current_file->getType() == "dir") {
+            //先判断当前目录是否可写,即鉴权
+            if (authUser(username, current_file) == "rw") {
+                //再判断文件名是否合法
+                if (util::findIllegalCharacter(filename))
+                    cout << "the filename is illegal" << endl;
+                else {
+                    //然后判断下本目录有没有重名文件
+                    tomFile *file = findFileInDir(filename, current_file);
+                    if (file == NULL) {
+                        //最后判断下权限定义是否正确
+                        if (permission != "r" && permission != "rw" && permission != "x")
+                            cout << "the permission is illegal" << endl;
+                        else {
+                            file = new tomFile("file", current_file->getPath(), filename,
+                                               pair<string, string>(username, "rw"), current_file);
+                            //对非本用户设置权限
+                            file->addPermissions(pair<string, string>("everyone", permission));
+                            current_file->addChildren(file);
+                        }
 
+                    } else
+                        cout << "the file already exists" << endl;
+                }
+            } else
+                cout << "you have no access to make file in this dir" << endl;
+        } else
+            cout << "this path is a file,not a dir" << endl;
+    }
 };
 
 

@@ -28,9 +28,9 @@ public:
 
 
     /**
-     * 查找某个字符串中是否有非法字符
+     * 查找某个字符串中是否有非法字符,也可判断是否是有效的文件路径,通过第二个参数控制
      */
-    static bool findIllegalCharacter(string s) {
+    static bool findIllegalCharacter(string s, bool isPath = false) {
         return s.find("!") != string::npos || s.find("~") != string::npos || s.find("`") != string::npos ||
                s.find("#") != string::npos || s.find("@") != string::npos || s.find("$") != string::npos ||
                s.find("%") != string::npos || s.find("^") != string::npos || s.find("&") != string::npos ||
@@ -40,22 +40,7 @@ public:
                s.find("\\") != string::npos || s.find(":") != string::npos || s.find(";") != string::npos ||
                s.find("\"") != string::npos || s.find("'") != string::npos || s.find(",") != string::npos ||
                s.find("?") != string::npos || s.find("<") != string::npos || s.find(">") != string::npos ||
-               s.find("/") != string::npos;
-    }
-
-    /**
-     * 判断是否是有效的文件路径
-     */
-    static bool findIllegalPath(string s) {
-        return s.find("!") != string::npos || s.find("~") != string::npos || s.find("`") != string::npos ||
-               s.find("#") != string::npos || s.find("@") != string::npos || s.find("$") != string::npos ||
-               s.find("%") != string::npos || s.find("^") != string::npos || s.find("&") != string::npos ||
-               s.find("*") != string::npos || s.find("(") != string::npos || s.find(")") != string::npos ||
-               s.find("+") != string::npos || s.find("{") != string::npos || s.find("}") != string::npos ||
-               s.find("[") != string::npos || s.find("]") != string::npos || s.find("|") != string::npos ||
-               s.find("\\") != string::npos || s.find(":") != string::npos || s.find(";") != string::npos ||
-               s.find("\"") != string::npos || s.find("'") != string::npos || s.find(",") != string::npos ||
-               s.find("?") != string::npos || s.find("<") != string::npos || s.find(">") != string::npos;
+               (isPath ? false : s.find("/") != string::npos);
     }
 
     /**
@@ -85,13 +70,13 @@ public:
         else if (command == "ls")
             cout << "ls:ls [-la]——list directory contents" << endl;
         else if (command == "rmfile")
-            cout << "rmfile:rmfile filename [dir]——remove file" << endl;
+            cout << "rmfile:rmfile filename——remove file" << endl;
         else if (command == "rmdir")
-            cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
+            cout << "rmdir:rmdir dirname——remove directory" << endl;
         else if (command == "mkfile")
-            cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;
+            cout << "mkfile:mkfile filename permissions[rw|r|x]——make file" << endl;
         else if (command == "mkdir")
-            cout << "mkdir:mkdir dirname permissions[rw|r|x] [dir]——make directory" << endl;
+            cout << "mkdir:mkdir dirname permissions[rw|r|x]——make directory" << endl;
         else if (command == "cp")
             cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
         else if (command == "mv")
@@ -126,10 +111,10 @@ public:
         cout << "write:write file——write file" << endl;
         cout << "file:file file|dir [dir]——list file details" << endl;
         cout << "ls:ls [-la]——list directory contents" << endl;
-        cout << "rmfile:rmfile filename [dir]——remove file" << endl;
-        cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
-        cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;
-        cout << "mkdir:mkdir dirname permissions[rw|r|x] [dir]——make directory" << endl;
+        cout << "rmfile:rmfile filename——remove file" << endl;
+        cout << "rmdir:rmdir dirname——remove directory" << endl;
+        cout << "mkfile:mkfile filename permissions[rw|r|x]——make file" << endl;
+        cout << "mkdir:mkdir dirname permissions[rw|r|x]——make directory" << endl;
         cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
         cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
         endl;

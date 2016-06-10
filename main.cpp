@@ -114,24 +114,23 @@ void _register() {
     }
 }
 
-
 /**
     * 命令分发,这是一个大部分命令的总分派函数,承担很大任务量,需要先做command的校验,用户鉴权在filesystem中做
     */
 static void dispatchCommand(string command) {
 
+    vector<string> parameters = util::split(command, " ");
+
     if (command.find("cd") == 0) {
-        vector<string> paths = util::split(command, " ");
-        if (paths.size() == 1) {
+        if (parameters.size() == 1) {
             cout << "please input path after cd" << endl;
-        } else if (paths.size() == 2) {
-            fSystem.changeDirectory(current_user.getUsername(), paths[1]);
+        } else if (parameters.size() == 2) {
+            fSystem.changeDirectory(current_user.getUsername(), parameters[1]);
         } else {
             cout << "please input the correct command,refer to 'cd+?'" << endl;
         }
     }
     else if (command.find("read") == 0) {
-        vector<string> parameters = util::split(command, " ");
         if (parameters.size() == 2) {
             fSystem.read(parameters[1], current_user.getUsername());
         } else {
@@ -139,7 +138,6 @@ static void dispatchCommand(string command) {
         }
     }
     else if (command.find("write") == 0) {
-        vector<string> parameters = util::split(command, " ");
         if (parameters.size() == 2) {
             fSystem.write(parameters[1], current_user.getUsername());
         } else {
@@ -147,7 +145,6 @@ static void dispatchCommand(string command) {
         }
     }
     else if (command.find("file") == 0) {
-        vector<string> parameters = util::split(command, " ");
         if (parameters.size() == 2) {
             fSystem.file(parameters[1], current_user.getUsername());
         } else {
@@ -155,7 +152,6 @@ static void dispatchCommand(string command) {
         }
     }
     else if (command.find("ls") == 0) {
-        vector<string> parameters = util::split(command, " ");
         if (parameters.size() == 1) {
             fSystem.ls(current_user.getUsername());
         } else if (parameters.size() == 2) {
@@ -165,17 +161,28 @@ static void dispatchCommand(string command) {
         }
     }
         //TODO
-    else if (command == "rmfile")
-        cout << "rmfile:rmfile filename [dir]——remove file" << endl;
-    else if (command == "rmdir")
-        cout << "rmdir:rmdir dirname [dir]——remove directory" << endl;
-    else if (command == "mkfile")
-        cout << "mkfile:mkfile filename permissions[rw|r|x] [dir]——make file" << endl;
-    else if (command == "mkdir")
-        cout << "mkdir:mkdir dirname permissions[rw|r|x] [dir]——make directory" << endl;
-    else if (command == "cp")
+    else if (command.find("rmfile") == 0) {
+        cout << "rmfile:rmfile filename——remove file" << endl;
+    }
+    else if (command.find("rmdir") == 0)
+        cout << "rmdir:rmdir dirname——remove directory" << endl;
+
+    else if (command.find("mkfile") == 0) {
+        if (parameters.size() == 2) {
+            //默认访问权限everyone rw
+            fSystem.mkfile(parameters[1], current_user.getUsername());
+        } else if (parameters.size() == 3) {
+            fSystem.mkfile(parameters[1], current_user.getUsername(), parameters[2]);
+        } else {
+            cout << "please input the correct command,refer to 'mkfile+?'" << endl;
+        }
+    }
+
+    else if (command.find("mkdir") == 0)
+        cout << "mkdir:mkdir dirname permissions[rw|r|x]——make directory" << endl;
+    else if (command.find("cp") == 0)
         cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
-    else if (command == "mv")
+    else if (command.find("mv") == 0)
         cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
         endl;
     else

@@ -486,6 +486,77 @@ public:
         } else
             cout << "this path is a file,not a dir" << endl;
     }
+
+    /**
+  * rmfile命令,删除一个文件,只能是当前路径下的文件,需要鉴权,可以是data/a.txt,b.txt形式
+  */
+    void rmfile(string filename, string username) {
+        if (util::findIllegalCharacter(filename, true))
+            cout << "the filename is illegal" << endl;
+        else {
+            tomFile *file;
+            //注意一下这种特殊情况,这是根节点的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + filename, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + filename, current_file);
+            if (file != NULL) {
+                if (file->getType() == "dir") {
+                    cout << "it's a dir,not a file" << endl;
+                } else {
+                    //鉴权
+                    if (authUser(username, file) == "rw") {
+                        for (int i = 0; i < file->getParent()->getChildren().size(); ++i) {
+                            if (file->getParent()->getChildren()[i]->getName() == file->getName()) {
+                                file->getParent()->deleteChildren(i);
+                                break;
+                            }
+                        }
+                        delete file;
+                    } else {
+                        cout << "you have no access to remove this file" << endl;
+                    }
+                }
+            } else
+                cout << "this file is not existed" << endl;
+        }
+    }
+
+    /**
+     * rmdir命令,删除一个目录,只能是当前路径下的目录,需要鉴权,可以是data/a,b形式
+     * 特别需要注意的是删除时必须目录下的全部文件都有权才可以删除
+     */
+    void rmdir(string dirname, string username) {
+        if (util::findIllegalCharacter(dirname, true))
+            cout << "the filename is illegal" << endl;
+        else {
+            tomFile *file;
+            //注意一下这种特殊情况,这是根节点的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + dirname, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + dirname, current_file);
+            if (file != NULL) {
+                if (file->getType() == "dir") {
+                    cout << "it's a dir,not a file" << endl;
+                } else {
+                    //鉴权
+                    if (authUser(username, file) == "rw") {
+                        for (int i = 0; i < file->getParent()->getChildren().size(); ++i) {
+                            if (file->getParent()->getChildren()[i]->getName() == file->getName()) {
+                                file->getParent()->deleteChildren(i);
+                                break;
+                            }
+                        }
+                        delete file;
+                    } else {
+                        cout << "you have no access to remove this file" << endl;
+                    }
+                }
+            } else
+                cout << "this file is not existed" << endl;
+        }
+    }
 };
 
 

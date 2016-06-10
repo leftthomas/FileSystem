@@ -160,13 +160,20 @@ static void dispatchCommand(string command) {
             cout << "please input the correct command,refer to 'ls+?'" << endl;
         }
     }
-        //TODO
     else if (command.find("rmfile") == 0) {
-        cout << "rmfile:rmfile filename——remove file" << endl;
+        if (parameters.size() == 2) {
+            fSystem.rmfile(parameters[1], current_user.getUsername());
+        } else {
+            cout << "please input the correct command,refer to 'rmfile+?'" << endl;
+        }
     }
-    else if (command.find("rmdir") == 0)
-        cout << "rmdir:rmdir dirname——remove directory" << endl;
-
+    else if (command.find("rmdir") == 0) {
+        if (parameters.size() == 2) {
+            fSystem.rmdir(parameters[1], current_user.getUsername());
+        } else {
+            cout << "please input the correct command,refer to 'rmdir+?'" << endl;
+        }
+    }
     else if (command.find("mkfile") == 0) {
         if (parameters.size() == 2) {
             //默认访问权限everyone rw
@@ -187,12 +194,14 @@ static void dispatchCommand(string command) {
             cout << "please input the correct command,refer to 'mkdir+?'" << endl;
         }
     }
-
-    else if (command.find("cp") == 0)
+        //TODO
+    else if (command.find("cp") == 0) {
         cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
-    else if (command.find("mv") == 0)
+    }
+    else if (command.find("mv") == 0) {
         cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
         endl;
+    }
     else
         cout << "command error" << endl;
 }

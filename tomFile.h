@@ -150,6 +150,18 @@ public:
     }
 
     /**
+     * 移除一个child,用了种麻烦的方法,因为erase()方法会很奇葩出问题
+     */
+    void deleteChildren(int position) {
+        vector<tomFile *> n;
+        for (int i = 0; i < children.size(); ++i) {
+            if (i != position)
+                n.push_back(children[i]);
+        }
+        children = n;
+    }
+
+    /**
    * 这个函数也要特殊注意,不能是set而是add
    */
     void addPermissions(const pair<string, string> &permission) {

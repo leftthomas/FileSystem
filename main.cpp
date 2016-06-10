@@ -130,10 +130,15 @@ static void dispatchCommand(string command) {
             cout << "please input the correct command,refer to 'cd+?'" << endl;
         }
     }
-        //TODO
     else if (command.find("read") == 0) {
-
+        vector<string> parameters = util::split(command, " ");
+        if (parameters.size() == 2) {
+            fSystem.read(parameters[1], current_user.getUsername());
+        } else {
+            cout << "please input the correct command,refer to 'read+?'" << endl;
+        }
     }
+        //TODO
     else if (command == "write")
         cout << "write:write file [dir]——write file" << endl;
 
@@ -155,7 +160,7 @@ static void dispatchCommand(string command) {
             cout << "please input the correct command,refer to 'ls+?'" << endl;
         }
     }
-
+        //TODO
     else if (command == "rmfile")
         cout << "rmfile:rmfile filename [dir]——remove file" << endl;
     else if (command == "rmdir")

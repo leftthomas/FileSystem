@@ -337,6 +337,38 @@ public:
         }
     }
 
+    /**
+     * read命令,显示某一个文件的内容,只能是当前路径下的文件,需要鉴权,可以是data/a.txt,b.txt形式
+     */
+    void read(string filename, string username) {
+        if (util::findIllegalPath(filename))
+            cout << "the filename is illegal" << endl;
+        else {
+            tomFile *file;
+            //注意一下这种特殊情况,这是根节点的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + filename, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + filename, current_file);
+            if (file != NULL) {
+                if (file->getType() == "dir") {
+                    cout << "it's a dir,not a file" << endl;
+                } else {
+                    //鉴权
+                    if (authUser(username, file) != "x") {
+                        if (file->getContent() == "") {
+                            cout << "this file is empty" << endl;
+                        } else
+                            cout << file->getContent() << endl;
+                    } else {
+                        cout << "you have no access to this file" << endl;
+                    }
+                }
+            } else
+                cout << "this file is not existed" << endl;
+        }
+    }
+
 /**
      * 添加文件,只有在type为dir时才有用
      * 4:表示此文件不是dir

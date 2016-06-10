@@ -9,51 +9,62 @@
 #include <string>
 #include <map>
 #include <time.h>
+#include <vector>
 
 using namespace std;
 
 class tomFile {
 private:
+    //种类,用来标记是文件夹还是文件(file、dir)
     string type;
-    //种类,用来标记是文件夹还是文件、其他可执行文件等
-    long size;
     //大小,以字节为单位计算
-    string location;
+    long size;
     //位置
-    bool locked;
-    //锁定情况,在write操作时需要设置
-    time_t createTime;
+    string location;
     //创建时间,在显示的时候需要转为字符串
-    time_t modifyTime;
+    time_t createTime;
     //修改时间,同上
-    string name;
+    time_t modifyTime;
     //名称
+    string name;
+    //文件内容,只有file有这个,dir是没有的
+    string content;
     //权限,此为一个map,标记>=1种权限使用者(everyone、当前用户、其他用户...),权限种类(读与写rw、无访问权限x、只读r)
     map<string, string> permissions;
+    //记录父节点
+    tomFile *parent;
+    //记录位于其下的文件,用来建树和查询
+    vector<tomFile *> children;
 
 public:
-    /**
-     * 指定permissions的构造函数
-     */
-    tomFile(const string &type, const string &location, const string &name, const map<string, string> &permissions)
-            : type(type), location(location), name(name), permissions(permissions) {
-        size = 0;//刚创建的时候大小为 0 byte
-        locked = false;//默认没锁定
-        time(&createTime);//指定为当前系统时间,下同
-        time(&modifyTime);
-    }
 
     /**
-     * 默认不指定permissions的构造函数
-     */
-    tomFile(const string &type, const string &location, const string &name) : type(type), location(location),
-                                                                              name(name) {
+        * 指定permissions的构造函数
+        */
+    tomFile(const string &type, const string &location, const string &name, const map<string, string> &permissions,
+            tomFile *parent) : type(type), location(location), name(name), permissions(permissions), parent(parent) {
         size = 0;//刚创建的时候大小为 0 byte
-        locked = false;//默认没锁定
         time(&createTime);//指定为当前系统时间,下同
         time(&modifyTime);
-        permissions.insert(map<string, string>::value_type("everyone", "rw"));//默认创建的文件为所有人可读可写
+        content = "";//刚创建时无内容
     }
+
+
+/**
+     * 默认不指定permissions的构造函数
+     */
+    tomFile(const string &type, const string &location, const string &name, tomFile *parent) : type(type),
+                                                                                               location(location),
+                                                                                               name(name),
+                                                                                               parent(parent) {
+        size = 0;//刚创建的时候大小为 0 byte
+        time(&createTime);//指定为当前系统时间,下同
+        time(&modifyTime);
+        content = "";
+        permissions.insert(map<string, string>::value_type("everyone", "rw"));//默认创建的文件为所有人可读可写
+
+    }
+
 
     const string &getType() const {
         return type;
@@ -63,7 +74,7 @@ public:
         tomFile::type = type;
     }
 
-    const map<string, string> &getPermissions() const {
+    map<string, string> getPermissions() const {
         return permissions;
     }
 
@@ -85,14 +96,6 @@ public:
 
     void setLocation(const string &location) {
         tomFile::location = location;
-    }
-
-    bool isLocked() const {
-        return locked;
-    }
-
-    void setLocked(bool locked) {
-        tomFile::locked = locked;
     }
 
     time_t getCreateTime() const {
@@ -117,6 +120,31 @@ public:
 
     void setName(const string &name) {
         tomFile::name = name;
+    }
+
+    const string &getContent() const {
+        return content;
+    }
+
+    void setContent(const string &content) {
+        tomFile::content = content;
+    }
+
+
+    vector<tomFile *> getChildren() const {
+        return children;
+    }
+
+    void setChildren(const vector<tomFile *> &children) {
+        tomFile::children = children;
+    }
+
+    tomFile *getParent() const {
+        return parent;
+    }
+
+    void setParent(tomFile *parent) {
+        tomFile::parent = parent;
     }
 };
 

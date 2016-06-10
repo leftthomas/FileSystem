@@ -11,9 +11,10 @@ using namespace std;
 
 class user {
 private:
-    string username;
     //用户名
-    string password;//密码
+    string username;
+    //密码
+    string password;
 
 public:
 

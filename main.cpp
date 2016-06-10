@@ -6,7 +6,8 @@ using namespace std;
 
 //全局的变量,用来记录当前登录的用户,默认一开始没有用户登录,即username="",password=""
 static user current_user("", "");
-
+//文件系统
+static fileSystem fSystem;
 
 /**
  * 显示欢迎和说明界面
@@ -113,8 +114,8 @@ void help() {
     cout << "pwd:pwd——print working directory" << endl;
     cout << "register:register——register the system" << endl;
     cout << "help:help——get the guide of all commands" << endl;
-    cout << "read:read file|dir [dir]——read file|dir" << endl;
-    cout << "write:write file|dir [dir]——write file|dir" << endl;
+    cout << "read:read file [dir]——read file" << endl;
+    cout << "write:write file [dir]——write file" << endl;
     cout << "file:file file|dir [dir]——list file details" << endl;
     cout << "ls:ls [-la] [dir]——list directory contents" << endl;
     cout << "rmfile:rmfile filename [dir]——remove file" << endl;
@@ -138,6 +139,8 @@ void _exit() {
 
 int main() {
     showMenu();
+    fSystem.init();
+
     bool over = false;
     string command;
     while (!over) {

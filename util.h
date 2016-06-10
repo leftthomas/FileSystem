@@ -6,10 +6,11 @@
 #define FILESYSTEM_UTIL_H
 
 #include <string>
-
+#include "fileSystem.h"
 using namespace std;
 
 class util {
+
 public:
     /**
      * 查找某个字符串中是否有非法字符
@@ -68,9 +69,9 @@ public:
         else if (command == "help")
             cout << "help:help——get the guide of all commands" << endl;
         else if (command == "read")
-            cout << "read:read file|dir [dir]——read file|dir" << endl;
+            cout << "read:read file [dir]——read file" << endl;
         else if (command == "write")
-            cout << "write:write file|dir [dir]——write file|dir" << endl;
+            cout << "write:write file [dir]——write file" << endl;
         else if (command == "file")
             cout << "file:file file|dir [dir]——list file details" << endl;
         else if (command == "ls")
@@ -110,9 +111,9 @@ public:
         if (command == "cd")
             cout << "cd:cd dir——change directory" << endl;
         else if (command == "read")
-            cout << "read:read file|dir [dir]——read file|dir" << endl;
+            cout << "read:read file [dir]——read file" << endl;
         else if (command == "write")
-            cout << "write:write file|dir [dir]——write file|dir" << endl;
+            cout << "write:write file [dir]——write file" << endl;
         else if (command == "file")
             cout << "file:file file|dir [dir]——list file details" << endl;
         else if (command == "ls")

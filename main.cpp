@@ -18,7 +18,6 @@ void showTip() {
         cout << current_user.getUsername() + "$>>";
 }
 
-
 /**
  * 显示登录或注册之后的界面
  */
@@ -115,8 +114,9 @@ void _register() {
 }
 
 /**
-    * 命令分发,这是一个大部分命令的总分派函数,承担很大任务量,需要先做command的校验,用户鉴权在filesystem中做
-    */
+ * 命令分发,这是一个大部分命令的总分派函数,
+ * 承担很大任务量,需要先做command的校验,用户鉴权在filesystem中做
+ */
 static void dispatchCommand(string command) {
 
     vector<string> parameters = util::split(command, " ");
@@ -177,9 +177,17 @@ static void dispatchCommand(string command) {
             cout << "please input the correct command,refer to 'mkfile+?'" << endl;
         }
     }
+    else if (command.find("mkdir") == 0) {
+        if (parameters.size() == 2) {
+            //默认访问权限everyone rw
+            fSystem.mkdir(parameters[1], current_user.getUsername());
+        } else if (parameters.size() == 3) {
+            fSystem.mkdir(parameters[1], current_user.getUsername(), parameters[2]);
+        } else {
+            cout << "please input the correct command,refer to 'mkdir+?'" << endl;
+        }
+    }
 
-    else if (command.find("mkdir") == 0)
-        cout << "mkdir:mkdir dirname permissions[rw|r|x]——make directory" << endl;
     else if (command.find("cp") == 0)
         cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
     else if (command.find("mv") == 0)

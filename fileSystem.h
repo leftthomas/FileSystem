@@ -444,12 +444,45 @@ public:
                             file->addPermissions(pair<string, string>("everyone", permission));
                             current_file->addChildren(file);
                         }
-
                     } else
                         cout << "the file already exists" << endl;
                 }
             } else
                 cout << "you have no access to make file in this dir" << endl;
+        } else
+            cout << "this path is a file,not a dir" << endl;
+    }
+
+    /**
+     * mkdir命令,其他同上
+     */
+    void mkdir(string dirname, string username, string permission = "rw") {
+        //只有dir下才可以新建目录
+        if (current_file->getType() == "dir") {
+            //先判断当前目录是否可写,即鉴权
+            if (authUser(username, current_file) == "rw") {
+                //再判断目录名是否合法
+                if (util::findIllegalCharacter(dirname))
+                    cout << "the dirname is illegal" << endl;
+                else {
+                    //然后判断下本目录有没有重名文件
+                    tomFile *file = findFileInDir(dirname, current_file);
+                    if (file == NULL) {
+                        //最后判断下权限定义是否正确
+                        if (permission != "r" && permission != "rw" && permission != "x")
+                            cout << "the permission is illegal" << endl;
+                        else {
+                            file = new tomFile("dir", current_file->getPath(), dirname,
+                                               pair<string, string>(username, "rw"), current_file);
+                            //对非本用户设置权限
+                            file->addPermissions(pair<string, string>("everyone", permission));
+                            current_file->addChildren(file);
+                        }
+                    } else
+                        cout << "the dir already exists" << endl;
+                }
+            } else
+                cout << "you have no access to make dir in this dir" << endl;
         } else
             cout << "this path is a file,not a dir" << endl;
     }

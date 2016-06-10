@@ -34,7 +34,7 @@ void login() {
         string username;
         cin >> username;
         //检查用户是否存在
-        if (!fileSystem::findUser(username)) {
+        if (!fSystem.findUser(username)) {
             cout << "the user isn't exist,please confirm the username" << endl;
         } else {
             username_success = true;
@@ -43,7 +43,7 @@ void login() {
                 string password;
                 cin >> password;
                 //判断密码是否正确
-                if (!fileSystem::isPasswordMatch(username, password)) {
+                if (!fSystem.isPasswordMatch(username, password)) {
                     cout << "the password isn't correct,please confirm your password" << endl;
                 } else {
                     password_success = true;
@@ -65,7 +65,7 @@ void _register() {
         string username;
         cin >> username;
         //先检查下输入的用户名有没有已经被注册了
-        if (fileSystem::findUser(username)) {
+        if (fSystem.findUser(username)) {
             cout << "the username is existed,please try another" << endl;
         } else {
             //再检查下是否有非法字符
@@ -84,7 +84,7 @@ void _register() {
                         endl;
                     } else {
                         password_success = true;
-                        fileSystem::_register(username, password);
+                        fSystem._register(username, password);
                         showPanel(username, password);
                     }
                 }
@@ -133,7 +133,6 @@ void _exit() {
     //记得退出系统的时候把当前用户给清除了
     current_user.setUsername("");
     current_user.setPassword("");
-    //TODO system clear
     cout << "the system is exited" << endl;
 }
 
@@ -148,16 +147,12 @@ void initFileSystem() {
     //配置文件
     tomFile *config = new tomFile("file", "/", "config.txt", pair<string, string>("root", "rw"), _root);
     //设置配置文件里面的用户数据
-    (*config).setContent("root 123456;");
+    (*config).setContent("root-123456;");
     fSystem.insert(_root, config);
     //home文件夹
     tomFile *home = new tomFile("dir", "/", "home", pair<string, string>("root", "rw"), _root);
     fSystem.insert(_root, home);
-    fSystem.pre_recurs_render(fSystem.getRoot(), 1);
 }
-
-
-
 
 /**
  * 主函数
@@ -165,7 +160,7 @@ void initFileSystem() {
 int main() {
     util::showMenu();
 
-    //TODO system init
+    initFileSystem();
 
     bool over = false;
     string command;
@@ -197,6 +192,14 @@ int main() {
                 else {
                     //TODO
                 }
+            } else if (command == "show") {
+                //做下登录验证
+                if (current_user.getUsername() == "")
+                    cout << "please login in first" << endl;
+                else {
+                    //把文件树打印出来看下
+                    fSystem.pre_recurs_render(fSystem.getRoot(), 1);
+                }
             }
                 //由于"+?"的条件if判断了,这里是else,所以条件可以直接判断是不是以某个命令打头
             else if (command.find("cd") == 0 || command.find("read") == 0 || command.find("write") == 0 ||
@@ -207,9 +210,6 @@ int main() {
             }
             else {
                 cout << "command not found" << endl;
-
-                initFileSystem();
-
             }
         }
     }

@@ -6,6 +6,7 @@
 #define FILESYSTEM_UTIL_H
 
 #include <string>
+#include <vector>
 using namespace std;
 
 class util {
@@ -14,8 +15,8 @@ public:
 
 
     /**
- * 显示欢迎和说明界面
- */
+    * 显示欢迎和说明界面
+    */
     static void showMenu() {
         cout << "welcome to the FileSystem" << endl;
         cout << "login————login the system" << endl;
@@ -50,6 +51,8 @@ public:
             cout << "cd:cd dir——change directory" << endl;
         else if (command == "exit")
             cout << "exit:exit——exit the system" << endl;
+        else if (command == "show")
+            cout << "show:show——show the system-tree" << endl;
         else if (command == "login")
             cout << "login:login——login the system" << endl;
         else if (command == "pwd")
@@ -99,6 +102,7 @@ public:
     static void help() {
         cout << "cd:cd dir——change directory" << endl;
         cout << "exit:exit——exit the system" << endl;
+        cout << "show:show——show the system-tree" << endl;
         cout << "login:login——login the system" << endl;
         cout << "pwd:pwd——print working directory" << endl;
         cout << "register:register——register the system" << endl;
@@ -114,6 +118,25 @@ public:
         cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
         cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
         endl;
+    }
+
+
+    //字符串分割函数
+    static vector<string> split(string str, string pattern) {
+        string::size_type pos;
+        vector<string> result;
+        str += pattern;//扩展字符串以方便操作
+        int size = str.size();
+
+        for (int i = 0; i < size; i++) {
+            pos = str.find(pattern, i);
+            if (pos < size) {
+                string s = str.substr(i, pos - i);
+                result.push_back(s);
+                i = pos + pattern.size() - 1;
+            }
+        }
+        return result;
     }
 
 };

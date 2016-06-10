@@ -22,27 +22,61 @@ public:
 
 
     /**
- *  查找是否存在此用户,其实质就是读config.txt文件
+ *  查找是否存在此用户,其实质就是读config.txt文件,使用的时候一定要记得查找起点在root,这样设置主要是为了递归调用方便
  */
-    static bool findUser(string username) {
-        //TODO
-        return true;
+    bool findUser(string username) {
+        bool found = false;
+        tomFile *current = findFile("config.txt", root);
+        //找到config文件
+        if (current != NULL) {
+            //按;分割成username password格式的字符串数组
+            vector<string> result = util::split(current->getContent(), ";");
+            for (int i = 0; i < result.size(); ++i) {
+                //按-分割成username和password
+                vector<string> result2 = util::split(result[i], "-");
+                if (result2[0] == username) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        return found;
     }
 
     /**
      * 判断密码与对应用户名是否匹配,其实质就是读config.txt文件
      */
-    static bool isPasswordMatch(string username, string password) {
-        //TODO
-        return true;
+    bool isPasswordMatch(string username, string password) {
+        bool match = false;
+        tomFile *current = findFile("config.txt", root);
+        //找到config文件
+        if (current != NULL) {
+            //按;分割成username password格式的字符串数组
+            vector<string> result = util::split(current->getContent(), ";");
+            for (int i = 0; i < result.size(); ++i) {
+                //按-分割成username和password
+                vector<string> result2 = util::split(result[i], "-");
+                if (result2[0] == username) {
+                    if (password == result2[1])
+                        match = true;
+                    break;
+                }
+            }
+        }
+        return match;
     }
 
     /**
      * 用户注册,其实质就是将用户名和密码写进config.txt
      */
-    static bool _register(string username, string password) {
-        //TODO
-        return true;
+    bool _register(string username, string password) {
+        bool success = false;
+        tomFile *current = findFile("config.txt", root);
+        if (current != NULL) {
+            current->setContent(current->getContent() + username + "-" + password + ";");
+            success = true;
+        }
+        return success;
     }
 
 
@@ -54,28 +88,28 @@ public:
      */
     int authUser(string username, tomFile file) {
 //        //没找到此用户
-//        if (file.getPermissions().find(username) == file.getPermissions().end()) {
-//            //找下everyone
-//            if (file.getPermissions().find("everyone") == file.getPermissions().end()) {
-//                return 0;
-//            } else {
-//                if ( file.getPermissions().find("everyone")->second == "x")
-//                    return 0;
-//                else if ( file.getPermissions().find("everyone")->second == "r")
-//                    return 1;
-//                else if ( file.getPermissions().find("everyone")->second == "rw")
-//                    return 2;
-//            }
-//        }
-//        else {
-//            if (file.getPermissions().find(username)->second == "x")
-//                return 0;
-//            else if (file.getPermissions().find(username)->second == "r")
-//                return 1;
-//            else if (file.getPermissions().find(username)->second == "rw")
-//                return 2;
-//        }
-//        return true;
+        if (file.getPermissions().find(username) == file.getPermissions().end()) {
+            //找下everyone
+            if (file.getPermissions().find("everyone") == file.getPermissions().end()) {
+                return 0;
+            } else {
+                if (file.getPermissions().find("everyone")->second == "x")
+                    return 0;
+                else if (file.getPermissions().find("everyone")->second == "r")
+                    return 1;
+                else if (file.getPermissions().find("everyone")->second == "rw")
+                    return 2;
+            }
+        }
+        else {
+            if (file.getPermissions().find(username)->second == "x")
+                return 0;
+            else if (file.getPermissions().find(username)->second == "r")
+                return 1;
+            else if (file.getPermissions().find(username)->second == "rw")
+                return 2;
+        }
+        return true;
     }
 
     /**
@@ -92,7 +126,7 @@ public:
         destroy(root);
     }
 
-    //注意传position的引用
+    //这个函数只在初始化的时候调用,其他时候都需要鉴权
     void insert(tomFile *parent, tomFile *tmp) {
         parent->addChildren(tmp);
     }
@@ -159,6 +193,29 @@ public:
 
     void setRoot(tomFile *root) {
         fileSystem::root = root;
+    }
+
+    /**
+     * 通过文件名递归查找文件
+     */
+    tomFile *findFile(string filename, tomFile *head) {
+        tomFile *temp = NULL;
+        int i = 0;
+        if (head != NULL) {
+            // 如果名字匹配
+            if (filename == head->getName()) {
+                temp = head;
+            }
+                // 如果不匹配，则查找其子节点
+            else {   /*如果temp不为空，则结束查找*/
+                for (i = 0; i < head->getChildren().size() && temp == NULL; ++i) {
+                    // 递归查找子节点
+                    temp = findFile(filename, head->getChildren()[i]);
+                }
+            }
+        }
+        // 将查找到的节点指针返回，也有可能没有找到，此时temp为NULL
+        return temp;
     }
 };
 

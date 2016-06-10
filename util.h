@@ -78,9 +78,9 @@ public:
         else if (command == "mkdir")
             cout << "mkdir:mkdir dirname permissions[rw|r|x]——make directory" << endl;
         else if (command == "cp")
-            cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
+            cout << "cp:cp dirname|filename ndir——copy file|dir to ndir" << endl;
         else if (command == "mv")
-            cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
+            cout << "mv:mv filename1|dirname1 filename2|dirname2——change the name of file1|dir1 to file2|dir2" <<
             endl;
         else
             cout << "command guide not found,the command isn't exist" << endl;
@@ -126,9 +126,9 @@ public:
         string::size_type pos;
         vector<string> result;
         str += pattern;//扩展字符串以方便操作
-        int size = str.size();
+        long size = str.size();
 
-        for (int i = 0; i < size; i++) {
+        for (unsigned long i = 0; i < size; i++) {
             pos = str.find(pattern, i);
             if (pos < size) {
                 string s = str.substr(i, pos - i);

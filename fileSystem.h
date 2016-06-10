@@ -600,6 +600,18 @@ public:
                 cout << "this dir is not existed" << endl;
         }
     }
+
+    //TODO
+    /**
+     * cp命令,拷贝一个file或者dir到新的目录下去,需要鉴权
+     * 形式可以为cp data ad,cp data ad/files,cp data.txt ad,cp data.txt ad/files(以当前目录为准)
+     * cp data /home/ad,cp data /home/ad/files,cp data.txt /home/ad,cp data.txt /home/ad/files(以绝对目录为准)
+     * 特别需要注意的是拷贝时必须被拷贝目录下的全部文件都有权,且放置目录也可读写才可以拷贝
+     * 需做重名检查
+     */
+    void cp(string dir_filename, string dir, string username) {
+
+    }
 };
 
 

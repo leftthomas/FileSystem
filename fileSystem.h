@@ -411,6 +411,8 @@ public:
                         string s;
                         getline(cin, s);
                         file->setContent(file->getContent() + s);
+                        //更新下时间
+                        updateFileTime(file);
                     } else {
                         cout << "you have no access to write this file" << endl;
                     }
@@ -445,6 +447,8 @@ public:
                             //对非本用户设置权限
                             file->addPermissions(pair<string, string>("everyone", permission));
                             current_file->addChildren(file);
+                            //更新下时间
+                            updateFileTime(file);
                         }
                     } else
                         cout << "the file already exists" << endl;
@@ -479,6 +483,8 @@ public:
                             //对非本用户设置权限
                             file->addPermissions(pair<string, string>("everyone", permission));
                             current_file->addChildren(file);
+                            //更新下时间
+                            updateFileTime(file);
                         }
                     } else
                         cout << "the dir already exists" << endl;
@@ -508,6 +514,8 @@ public:
                 } else {
                     //鉴权
                     if (authUser(username, file) == "rw") {
+                        //操作之前先更新下时间
+                        updateFileTime(file);
                         for (int i = 0; i < file->getParent()->getChildren().size(); ++i) {
                             if (file->getParent()->getChildren()[i]->getName() == file->getName()) {
                                 file->getParent()->deleteChildren(i);
@@ -584,6 +592,8 @@ public:
                     qualification = true;
                     authAll(username, file);
                     if (qualification) {
+                        //操作之前先更新下时间
+                        updateFileTime(file);
                         for (int i = 0; i < file->getParent()->getChildren().size(); ++i) {
                             if (file->getParent()->getChildren()[i]->getName() == file->getName()) {
                                 file->getParent()->deleteChildren(i);
@@ -629,12 +639,16 @@ public:
                 if (dir != NULL) {
                     //两个都是相对路径,都找到了
                     copy(file, dir, username);
+                    //更新下时间
+                    updateFileTime(dir);
                 } else {
                     //dir相对路径下没找到,需要找绝对路径
                     dir = findFileByPath(dir_name, root);
                     if (dir != NULL) {
                         //file是相对路径,dir是绝对路径,找到了
                         copy(file, dir, username);
+                        //更新下时间
+                        updateFileTime(dir);
                     }
                     else
                         cout << "the target dir is not existed" << endl;
@@ -651,12 +665,16 @@ public:
                     if (dir != NULL) {
                         //file是绝对路径,dir是相对路径,找到了
                         copy(file, dir, username);
+                        //更新下时间
+                        updateFileTime(dir);
                     } else {
                         //dir相对路径下没找到,需要找绝对路径
                         dir = findFileByPath(dir_name, root);
                         if (dir != NULL) {
                             //file和dir都是绝对路径,找到了
                             copy(file, dir, username);
+                            //更新下时间
+                            updateFileTime(dir);
                         }
                         else
                             cout << "the target dir is not existed" << endl;
@@ -775,9 +793,12 @@ public:
                     //鉴权
                     if (authUser(username, file) != "rw")
                         cout << "you have no access to rename this dir|file" << endl;
-                    else
+                    else {
                         //可以重命名
                         file->setName(dir_name);
+                        //更新下时间
+                        updateFileTime(file);
+                    }
                 } else {
                     //需要命名的名字文件已存在
                     cout << "the target filename|dirname already existed" << endl;
@@ -785,6 +806,17 @@ public:
             } else {
                 cout << "the file|dir is not existed" << endl;
             }
+        }
+    }
+
+    /**
+     * 沿着树往根走,全部时间更新
+     */
+    void updateFileTime(tomFile *t) {
+        tomFile *x = t;
+        while (t != NULL) {
+            t->setModifyTime(time(0));
+            t = t->getParent();
         }
     }
 };

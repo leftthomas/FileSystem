@@ -201,10 +201,12 @@ static void dispatchCommand(string command) {
             cout << "please input the correct command,refer to 'cp+?'" << endl;
         }
     }
-        //TODO
     else if (command.find("mv") == 0) {
-        cout << "mv:mv filename1|dirname1 filename2|dirname2——change the name of file1|dir1 to file2|dir2" <<
-        endl;
+        if (parameters.size() == 3) {
+            fSystem.mv(parameters[1], parameters[2], current_user.getUsername());
+        } else {
+            cout << "please input the correct command,refer to 'mv+?'" << endl;
+        }
     }
     else
         cout << "command error" << endl;

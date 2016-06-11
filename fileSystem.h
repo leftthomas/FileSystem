@@ -601,7 +601,6 @@ public:
         }
     }
 
-    //TODO
     /**
      * cp命令,拷贝一个file或者dir到新的目录下去,需要鉴权
      * 形式可以为cp data ad,cp data ad/files,cp data.txt ad,cp data.txt ad/files(以当前目录为准)
@@ -609,8 +608,184 @@ public:
      * 特别需要注意的是拷贝时必须被拷贝目录下的全部文件都有权,且放置目录也可读写才可以拷贝
      * 需做重名检查
      */
-    void cp(string dir_filename, string dir, string username) {
+    void cp(string dir_filename, string dir_name, string username) {
+        //先做参数检查
+        if (util::findIllegalCharacter(dir_filename, true) || util::findIllegalCharacter(dir_name, true))
+            cout << "the dirname|filename is illegal" << endl;
+        else {
+            tomFile *file;//需要拷贝的目标文件或文件夹
+            //先找下这个文件有没有,这是给定路径是相对路径的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + dir_filename, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + dir_filename, current_file);
+            //相对路径情况找到了,按相对路径处理,接下来找第二个拷贝到的dir是否存在,也分两种情况,相对路径和绝对路径
+            if (file != NULL) {
+                tomFile *dir;//拷贝到的目标dir
+                if (current_file == root)
+                    dir = findFileByPath(current_file->getPath() + dir_name, current_file);
+                else
+                    dir = findFileByPath(current_file->getPath() + "/" + dir_name, current_file);
+                if (dir != NULL) {
+                    //两个都是相对路径,都找到了
+                    copy(file, dir, username);
+                } else {
+                    //dir相对路径下没找到,需要找绝对路径
+                    dir = findFileByPath(dir_name, root);
+                    if (dir != NULL) {
+                        //file是相对路径,dir是绝对路径,找到了
+                        copy(file, dir, username);
+                    }
+                    else
+                        cout << "the target dir is not existed" << endl;
+                }
+            } else {
+                //file是绝对路径
+                file = findFileByPath(dir_filename, root);
+                if (file != NULL) {
+                    tomFile *dir;//拷贝到的目标dir
+                    if (current_file == root)
+                        dir = findFileByPath(current_file->getPath() + dir_name, current_file);
+                    else
+                        dir = findFileByPath(current_file->getPath() + "/" + dir_name, current_file);
+                    if (dir != NULL) {
+                        //file是绝对路径,dir是相对路径,找到了
+                        copy(file, dir, username);
+                    } else {
+                        //dir相对路径下没找到,需要找绝对路径
+                        dir = findFileByPath(dir_name, root);
+                        if (dir != NULL) {
+                            //file和dir都是绝对路径,找到了
+                            copy(file, dir, username);
+                        }
+                        else
+                            cout << "the target dir is not existed" << endl;
+                    }
+                }
+                else
+                    cout << "the target file is not existed" << endl;
+            }
+        }
+    }
 
+    /**
+     * 给cp函数做调用的,需要鉴权,重名检查以及type验证
+     */
+    void copy(tomFile *file, tomFile *dir, string username) {
+        //先做type验证
+        if (dir->getType() != "dir")
+            cout << "the target is a file,not a dir" << endl;
+        else {
+            //再判断下dir有没有权写,这里只需要判断dir的权限,不需要子节点都有权
+            if (authUser(username, dir) != "rw")
+                cout << "you have no access to copy file to this dir" << endl;
+            else {
+                //被拷贝文件需要分两种情况,如果是file,只需看其权限是不是x,不是的话都可拷贝,如果是dir,需要全部权限都不是x,否则无权
+                if (file->getType() == "file") {
+                    if (authUser(username, file) != "x") {
+                        //最后判断下拷贝到的目录有没有重名文件
+                        if (findFileInDir(file->getName(), dir) == NULL) {
+                            //拷贝的逻辑实现就是新建一个同file节点添加进dir的child中
+                            tomFile *op = newnode(file, dir->getPath());
+                            //以下两步一定不能少
+                            op->setParent(dir);
+                            dir->addChildren(op);
+                        }
+                        else
+                            cout << "the target dir already has the file" << endl;
+                    } else
+                        cout << "you have no access to copy this file" << endl;
+                } else {
+                    //默认设置有权
+                    qualification = true;
+                    //全权判断
+                    authAll(username, file);
+                    if (qualification) {
+                        //最后判断下拷贝到的目录有没有重名文件
+                        if (findFileInDir(file->getName(), dir) == NULL) {
+                            tomFile *p = makeSubTree(file, dir->getPath());
+                            p->setParent(dir);
+                            dir->addChildren(p);
+                        }
+                        else
+                            cout << "the target dir already has the dir" << endl;
+
+                    } else
+                        cout << "you have no access to copy this dir" << endl;
+                }
+            }
+        }
+    }
+
+    /**
+     * 给cp函数用,递归遍历生成一棵新的子树,给copy用,返回新的树的根节点指针
+     */
+    tomFile *makeSubTree(tomFile *ptr, string loc) {
+        tomFile *node;
+        if (ptr == NULL) {
+            return NULL;
+        } else {
+            node = newnode(ptr, loc);
+            for (int i = 0; i < ptr->getChildren().size(); ++i) {
+                node->addChildren(makeSubTree(ptr->getChildren()[i], node->getPath()));
+            }
+            return node;
+        }
+    }
+
+
+    /**
+     * 给copy函数使用,方便新建一个一样的file,没有指定child和parent
+     * location这个参数一定一定要注意啊,debug之后才发现问题
+     * 一定要记得改到拷贝之后的路径
+     */
+    tomFile *newnode(tomFile *t, string loc) {
+        tomFile *a = new tomFile(t->getType(), t->getLocation(), t->getName(), t->getPermissions(), 0);
+        a->setContent(t->getContent());
+        a->setCreateTime(t->getCTime());
+        a->setModifyTime(t->getMTime());
+        a->setLocation(loc);
+        a->setSize(178);//默认初始参数
+        return a;
+    }
+
+    /**
+     * mv命令,重命名,需要鉴权和重名检查,只允许相对路径,再做绝对路径头都大了
+     * mv a.txt b.txt;mv a v
+     */
+    void mv(string dir_filename, string dir_name, string username) {
+        //先做参数检查
+        if (util::findIllegalCharacter(dir_filename) || util::findIllegalCharacter(dir_name))
+            cout << "the dirname|filename is illegal" << endl;
+        else {
+            tomFile *file;//需要重命名的目标文件或文件夹
+            //先找下这个文件有没有,是相对路径的情况
+            if (current_file == root)
+                file = findFileByPath(current_file->getPath() + dir_filename, current_file);
+            else
+                file = findFileByPath(current_file->getPath() + "/" + dir_filename, current_file);
+            //相对路径情况找到了,按相对路径处理,接下来找第二个重命名的dir是否存在,相对路径
+            if (file != NULL) {
+                tomFile *dir;//重命名的目标dir
+                if (current_file == root)
+                    dir = findFileByPath(current_file->getPath() + dir_name, current_file);
+                else
+                    dir = findFileByPath(current_file->getPath() + "/" + dir_name, current_file);
+                if (dir == NULL) {
+                    //鉴权
+                    if (authUser(username, file) != "rw")
+                        cout << "you have no access to rename this dir|file" << endl;
+                    else
+                        //可以重命名
+                        file->setName(dir_name);
+                } else {
+                    //需要命名的名字文件已存在
+                    cout << "the target filename|dirname already existed" << endl;
+                }
+            } else {
+                cout << "the file|dir is not existed" << endl;
+            }
+        }
     }
 };
 

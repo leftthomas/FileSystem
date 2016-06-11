@@ -18,7 +18,8 @@ private:
     //种类,用来标记是文件夹还是文件(file、dir)
     string type;
     //大小,以字节为单位计算
-    long size;
+    //刚创建的时候大小,以178byte计算
+    long size = 178;
     //位置
     string location;
     //创建时间,在显示的时候需要转为字符串
@@ -38,19 +39,16 @@ private:
 
 public:
 
-    /**
+/**
         * 指定permissions的构造函数
         */
     tomFile(const string &type, const string &location, const string &name, const pair<string, string> &permission,
             tomFile *parent) : type(type), location(location), name(name), parent(parent) {
-        //刚创建的时候大小,以178byte计算
-        size = 178;
         time(&createTime);//指定为当前系统时间,下同
         time(&modifyTime);
         content = "";//刚创建时无内容
         permissions.insert(permission);
     }
-
 
 /**
      * 默认不指定permissions的构造函数
@@ -59,12 +57,24 @@ public:
                                                                                                location(location),
                                                                                                name(name),
                                                                                                parent(parent) {
-        size = 178;
         time(&createTime);//指定为当前系统时间,下同
         time(&modifyTime);
         content = "";
         permissions.insert(map<string, string>::value_type("everyone", "rw"));//默认创建的文件为所有人可读可写
 
+    }
+
+    /**
+     * 这个构造函数也是用在copy时,方便权限的直接复制
+     */
+    tomFile(const string &type, const string &location, const string &name, const map<string, string> &permission,
+            tomFile *parent) : type(type), location(location), name(name), parent(parent) {
+        //刚创建的时候大小,以178byte计算
+        size = 178;
+        time(&createTime);//指定为当前系统时间,下同
+        time(&modifyTime);
+        content = "";//刚创建时无内容
+        permissions = permission;
     }
 
 
@@ -83,7 +93,7 @@ public:
 
     long getSize() const {
         //简单的以content内容大小来计算
-        return 178 + content.length();
+        return size + content.length();
     }
 
     void setSize(long size) {
@@ -102,12 +112,20 @@ public:
         return ctime(&createTime);
     }
 
+    time_t getCTime() const {
+        return createTime;
+    }
+
     void setCreateTime(time_t createTime) {
         tomFile::createTime = createTime;
     }
 
     string getModifyTime() const {
         return ctime(&modifyTime);
+    }
+
+    time_t getMTime() const {
+        return modifyTime;
     }
 
     void setModifyTime(time_t modifyTime) {
@@ -182,6 +200,7 @@ public:
                 return location + name;
         }
     }
+
 };
 
 

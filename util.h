@@ -66,7 +66,7 @@ public:
         else if (command == "write")
             cout << "write:write file——write file" << endl;
         else if (command == "file")
-            cout << "file:file file|dir [dir]——list file details" << endl;
+            cout << "file:file file|dir——list file details" << endl;
         else if (command == "ls")
             cout << "ls:ls [-la]——list directory contents" << endl;
         else if (command == "rmfile")
@@ -109,14 +109,14 @@ public:
         cout << "help:help——get the guide of all commands" << endl;
         cout << "read:read file——read file" << endl;
         cout << "write:write file——write file" << endl;
-        cout << "file:file file|dir [dir]——list file details" << endl;
+        cout << "file:file file|dir——list file details" << endl;
         cout << "ls:ls [-la]——list directory contents" << endl;
         cout << "rmfile:rmfile filename——remove file" << endl;
         cout << "rmdir:rmdir dirname——remove directory" << endl;
         cout << "mkfile:mkfile filename permissions[rw|r|x]——make file" << endl;
         cout << "mkdir:mkdir dirname permissions[rw|r|x]——make directory" << endl;
-        cout << "cp:cp dirname|filename ndir [odir]——copy file|dir [from odir] to ndir" << endl;
-        cout << "mv:mv filename1|dirname1 filename2|dirname2 [dir]——change the name of file1|dir1 to file2|dir2" <<
+        cout << "cp:cp dirname|filename ndir——copy file|dir to ndir" << endl;
+        cout << "mv:mv filename1|dirname1 filename2|dirname2——change the name of file1|dir1 to file2|dir2" <<
         endl;
     }
 

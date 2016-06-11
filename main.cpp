@@ -23,7 +23,7 @@ void showTip() {
  */
 void showPanel(string username, string password) {
     //先清屏
-    system("clear");
+//    system("clear");
     //更新下当前登录的用户
     current_user.setUsername(username);
     current_user.setPassword(password);

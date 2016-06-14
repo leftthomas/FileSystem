@@ -704,9 +704,9 @@ public:
                         //最后判断下拷贝到的目录有没有重名文件
                         if (findFileInDir(file->getName(), dir) == NULL) {
                             //拷贝的逻辑实现就是新建一个同file节点添加进dir的child中
-                            tomFile *op = newnode(file, dir->getPath());
+                            tomFile *op = newnode(file, dir->getPath(), dir);
                             //以下两步一定不能少
-                            op->setParent(dir);
+//                            op->setParent(dir);
                             dir->addChildren(op);
                         }
                         else
@@ -721,8 +721,8 @@ public:
                     if (qualification) {
                         //最后判断下拷贝到的目录有没有重名文件
                         if (findFileInDir(file->getName(), dir) == NULL) {
-                            tomFile *p = makeSubTree(file, dir->getPath());
-                            p->setParent(dir);
+                            tomFile *p = makeSubTree(file, dir->getPath(), dir);
+//                            p->setParent(dir);
                             dir->addChildren(p);
                         }
                         else
@@ -738,27 +738,27 @@ public:
     /**
      * 给cp函数用,递归遍历生成一棵新的子树,给copy用,返回新的树的根节点指针
      */
-    tomFile *makeSubTree(tomFile *ptr, string loc) {
+    tomFile *makeSubTree(tomFile *ptr, string loc, tomFile *p) {
         tomFile *node;
         if (ptr == NULL) {
             return NULL;
         } else {
-            node = newnode(ptr, loc);
+            node = newnode(ptr, loc, p);
             for (int i = 0; i < ptr->getChildren().size(); ++i) {
-                node->addChildren(makeSubTree(ptr->getChildren()[i], node->getPath()));
+//                cout<<node->getLocation()<<endl;
+                node->addChildren(makeSubTree(ptr->getChildren()[i], node->getPath(), node));
             }
             return node;
         }
     }
-
 
     /**
      * 给copy函数使用,方便新建一个一样的file,没有指定child和parent
      * location这个参数一定一定要注意啊,debug之后才发现问题
      * 一定要记得改到拷贝之后的路径
      */
-    tomFile *newnode(tomFile *t, string loc) {
-        tomFile *a = new tomFile(t->getType(), t->getLocation(), t->getName(), t->getPermissions(), 0);
+    tomFile *newnode(tomFile *t, string loc, tomFile *p) {
+        tomFile *a = new tomFile(t->getType(), t->getLocation(), t->getName(), t->getPermissions(), p);
         a->setContent(t->getContent());
         a->setCreateTime(t->getCTime());
         a->setModifyTime(t->getMTime());
